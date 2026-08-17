@@ -99,6 +99,134 @@ async function loadEditor() {
   editorBox.hidden = false;
 }
 
+// ---- 정보성 글 자동생성 파이프라인 ----
+
+const INFO_STAGE_LABEL = {
+  queued: '대기 중...',
+  selecting_topic: 'AI가 아직 다루지 않은 주제를 고르고 초안을 쓰는 중...',
+  sourcing_image: 'Pexels에서 표지 이미지를 찾는 중...',
+  planning_image: '표지 이미지 크롭 포인트를 정하는 중...',
+  editing_image: '이미지를 다듬는 중...',
+  reviewing: '문체를 다듬는 중...',
+  ready: '초안이 준비됐습니다. "나의 한마디"를 작성해야 발행할 수 있습니다.',
+  published: '발행 완료!',
+  error: '오류가 발생했습니다.',
+};
+
+const infoGenerateBtn = document.getElementById('info-generate-btn');
+const infoProgressBox = document.getElementById('info-progress');
+const infoProgressText = document.getElementById('info-progress-text');
+const infoEditorBox = document.getElementById('info-editor');
+const infoHumanNoteInput = document.getElementById('info-humannote');
+const infoGateWarning = document.getElementById('info-gate-warning');
+const infoPublishBtn = document.getElementById('info-publish-btn');
+const infoPublishResult = document.getElementById('info-publish-result');
+
+let currentInfoPostId = null;
+let infoPollTimer = null;
+
+infoGenerateBtn.addEventListener('click', async () => {
+  infoGenerateBtn.disabled = true;
+  infoProgressBox.hidden = false;
+  infoEditorBox.hidden = true;
+  infoProgressText.textContent = '요청 중...';
+
+  try {
+    const res = await fetch('/api/info/generate', { method: 'POST' });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || '생성 요청 실패');
+    currentInfoPostId = json.postId;
+    pollInfoStatus();
+  } catch (err) {
+    infoProgressText.textContent = `실패: ${err.message}`;
+    infoGenerateBtn.disabled = false;
+  }
+});
+
+function pollInfoStatus() {
+  clearInterval(infoPollTimer);
+  infoPollTimer = setInterval(async () => {
+    const res = await fetch(`/api/info/${currentInfoPostId}/status`);
+    const status = await res.json();
+    infoProgressText.textContent = `${INFO_STAGE_LABEL[status.stage] || status.stage} (${status.progress || 0}%)`;
+
+    if (status.stage === 'ready') {
+      clearInterval(infoPollTimer);
+      infoGenerateBtn.disabled = false;
+      await loadInfoEditor();
+    } else if (status.stage === 'error') {
+      clearInterval(infoPollTimer);
+      infoGenerateBtn.disabled = false;
+      infoProgressText.textContent = `오류: ${status.error}`;
+    }
+  }, 2000);
+}
+
+async function loadInfoEditor() {
+  const res = await fetch(`/api/info/${currentInfoPostId}`);
+  const content = await res.json();
+
+  document.getElementById('info-cover-preview').src = `/data/posts/${currentInfoPostId}/edited_images/cover.jpg`;
+  const attr = content.coverImageAttribution;
+  document.getElementById('info-attribution').textContent = attr
+    ? `Photo by ${attr.photographer} on Pexels`
+    : '';
+  document.getElementById('info-title').value = content.title || '';
+  document.getElementById('info-category').value = content.category || '';
+  document.getElementById('info-tags').value = (content.tags || []).join(', ');
+  document.getElementById('info-excerpt').value = content.excerpt || '';
+  document.getElementById('info-body').value = content.body || '';
+  document.getElementById('info-alt').value = content.coverImageAlt || '';
+  infoHumanNoteInput.value = content.humanNote || '';
+
+  updateInfoGate();
+  infoEditorBox.hidden = false;
+}
+
+function updateInfoGate() {
+  const filled = infoHumanNoteInput.value.trim().length > 0;
+  infoPublishBtn.disabled = !filled;
+  infoGateWarning.hidden = filled;
+}
+
+infoHumanNoteInput.addEventListener('input', updateInfoGate);
+
+infoPublishBtn.addEventListener('click', async () => {
+  infoPublishBtn.disabled = true;
+  infoPublishResult.textContent = '저장 중...';
+
+  const patch = {
+    title: document.getElementById('info-title').value.trim(),
+    category: document.getElementById('info-category').value.trim(),
+    tags: document.getElementById('info-tags').value.split(',').map((t) => t.trim()).filter(Boolean),
+    excerpt: document.getElementById('info-excerpt').value.trim(),
+    body: document.getElementById('info-body').value.trim(),
+    coverImageAlt: document.getElementById('info-alt').value.trim(),
+    humanNote: infoHumanNoteInput.value.trim(),
+  };
+
+  try {
+    await fetch(`/api/info/${currentInfoPostId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(patch),
+    });
+
+    infoPublishResult.textContent = '발행 중...';
+    const res = await fetch(`/api/info/${currentInfoPostId}/publish`, { method: 'POST' });
+    const json = await res.json();
+    if (json.ok) {
+      infoPublishResult.textContent = `발행 완료: ${json.slug} (1~2분 후 사이트에 반영됩니다)`;
+    } else {
+      infoPublishResult.textContent = `실패: ${json.error}`;
+    }
+  } catch (err) {
+    infoPublishResult.textContent = `실패: ${err.message}`;
+  } finally {
+    updateInfoGate();
+  }
+});
+
 publishBtn.addEventListener('click', async () => {
   publishBtn.disabled = true;
   publishResult.textContent = '저장 중...';
