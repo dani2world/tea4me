@@ -10,6 +10,7 @@ interface Props {
 
 const { post } = Astro.props;
 const { data } = post;
+const base = import.meta.env.BASE_URL;
 const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }).format(
   data.pubDate,
 );
@@ -21,7 +22,7 @@ const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'lo
       <span class={`tag ${data.type === 'experience' ? 'tag--experience' : 'tag--info'}`}>
         {data.type === 'experience' ? '경험' : '정보'}
       </span>
-      <span class="post__category">{data.category}</span>
+      <a class="post__category" href={`${base}/category/${data.category}`}>{data.category}</a>
       <span class="post__date">{dateLabel}</span>
     </div>
     <h1 class="post__title">{data.title}</h1>
@@ -35,7 +36,7 @@ const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'lo
     {data.tags.length > 0 && (
       <ul class="post__tags">
         {data.tags.map((tag) => (
-          <li>#{tag}</li>
+          <li><a href={`${base}/tags/${tag}`}>#{tag}</a></li>
         ))}
       </ul>
     )}
@@ -60,6 +61,14 @@ const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'lo
   .post__date {
     font-size: 13px;
     color: var(--text-muted);
+  }
+
+  .post__category:hover {
+    color: var(--accent);
+  }
+
+  .post__tags a:hover {
+    color: var(--accent);
   }
 
   .post__title {

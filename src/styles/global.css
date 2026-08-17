@@ -119,3 +119,42 @@ img {
 .btn--ghost:hover {
   border-color: var(--accent);
 }
+
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.page-heading {
+  padding: 56px 0 32px;
+}
+
+.page-heading__label {
+  font-family: var(--font-label);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.page-heading__title {
+  font-size: clamp(24px, 4vw, 34px);
+}
+
+.empty-state {
+  color: var(--text-muted);
+  padding-bottom: 64px;
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 64px 0 40px;
+  }
+
+  .header__nav {
+    gap: 14px;
+  }
+}
