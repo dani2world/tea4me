@@ -6,6 +6,7 @@ const { processImage } = require('./imageProcessor');
 const { searchAndDownload } = require('./stockImageService');
 const { writeStatus, writeContent } = require('./postStore');
 const { listPublishedPosts } = require('./topicRegistry');
+const { ANTI_AI_STYLE_GUIDE } = require('./styleGuide');
 
 const CATEGORIES = ['녹차', '홍차', '우롱차', '보이차·흑차', '백차', '다구·브루잉', '티하우스 리뷰'];
 
@@ -26,9 +27,14 @@ ${covered}
 1. 아직 다루지 않은 차 관련 주제를 하나 고르세요 (다음 카테고리 중에서:
    ${CATEGORIES.join(', ')}).
 2. 그 주제로 블로그 글 전체를 당신의 지식을 바탕으로 작성하세요. 문단은 3~5개,
-   각 문단은 빈 줄로 구분. 확인되지 않은 사실을 단정적으로 말하지 마세요.
+   각 문단은 빈 줄로 구분. 확인되지 않은 사실을 단정적으로 말하지 마세요. 독자에게
+   말을 건네는 정중한 "~습니다"체를 기본으로 쓰되, "~거든요, ~인데요, ~하고요" 같은
+   어미도 섞어서 모든 문장이 기계적으로 "~습니다"로만 끝나지 않게 하세요. 예외나
+   변수가 있다면 숨기지 말고 언급하세요 (모든 걸 깔끔한 정답처럼 말하지 말 것).
 3. 표지 이미지를 구할 영문 검색어(Pexels 스톡 사진 검색용, 2~4단어, 예:
    "green tea leaves close up")를 함께 제시하세요.
+
+${ANTI_AI_STYLE_GUIDE}
 
 다음 JSON 스키마로만 응답하세요 (다른 텍스트 없이):
 {
@@ -53,9 +59,14 @@ function buildFocalPrompt(photoFilename) {
 }
 
 function buildReviewPrompt(body) {
-  return `아래는 차 블로그에 실릴 정보성 글 초안입니다. 100% AI가 작성한 글이므로,
-AI가 쓴 티가 나는 부분(획일적인 문단 길이, 반복되는 문장 종결, 상투적인 표현,
-과장된 결론)을 다듬어 자연스럽게 고쳐주세요. 사실관계는 바꾸지 말고 문체만 다듬으세요.
+  return `아래는 차 블로그에 실릴 정보성 글 초안입니다. 100% AI가 작성한 글이라 AI 티가
+가장 나기 쉬운 콘텐츠입니다. 편집자 입장에서 AI가 쓴 티가 나는 부분을 찾아 고치는 게
+이번 작업의 핵심입니다. 사실관계는 바꾸지 말고 문체만 다듬으세요.
+
+${ANTI_AI_STYLE_GUIDE}
+
+위 기준에 걸리는 문장이 하나라도 있으면 반드시 고치세요. 특히 정보성 글은 "첫째/둘째",
+깔끔한 요약형 결론으로 흐르기 쉬우니 더 엄격하게 점검하세요.
 
 [초안]
 ${body}
