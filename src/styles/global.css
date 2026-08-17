@@ -13,6 +13,7 @@
   --tag-experience-text: #f7f4ec;
   --tag-info-bg: #e4e9df;
   --tag-info-text: #55694d;
+  --shadow: rgba(38, 37, 31, 0.14);
 
   --font-main: 'Wanted Sans Variable', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
   --font-label: 'Space Grotesk', var(--font-main);
@@ -30,6 +31,7 @@
   --tag-experience-text: #1c1b17;
   --tag-info-bg: #2c3229;
   --tag-info-text: #b9c6ae;
+  --shadow: rgba(0, 0, 0, 0.45);
 }
 
 * {
