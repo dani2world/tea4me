@@ -6,7 +6,7 @@ const { processImage } = require('./imageProcessor');
 const { searchAndDownloadVetted } = require('./stockImageService');
 const { writeStatus, writeContent } = require('./postStore');
 const { listPublishedPosts } = require('./topicRegistry');
-const { ANTI_AI_STYLE_GUIDE } = require('./styleGuide');
+const { ANTI_AI_STYLE_GUIDE, TONE_GUIDE } = require('./styleGuide');
 
 const CATEGORIES = ['녹차', '홍차', '우롱차', '보이차·흑차', '백차', '다구·브루잉', '티하우스 리뷰'];
 
@@ -32,9 +32,6 @@ ${covered}
 1. 아직 다루지 않은 차 관련 주제를 하나 고르세요 (다음 카테고리 중에서:
    ${CATEGORIES.join(', ')}).
 2. 그 주제로 블로그 글 전체를 작성하세요. 문단은 3~5개, 각 문단은 빈 줄로 구분.
-   독자에게 말을 건네는 정중한 "~습니다"체를 기본으로 쓰되, "~거든요, ~인데요,
-   ~하고요" 같은 어미도 섞어서 모든 문장이 기계적으로 "~습니다"로만 끝나지
-   않게 하세요.
 3. 내용은 반드시 공인되거나 검증 가능한 정보만 다루세요. 출처가 불분명한 속설·통념을
    사실처럼 단정하지 마세요. 확실하지 않은 유래·기원설은 "~라는 설이 있으나 확실하지
    않다"처럼 명시하고, 통계·수치는 근거 없이 지어내지 마세요. 예외나 변수가 있다면
@@ -49,6 +46,8 @@ ${covered}
 6. 본문을 다 읽지 않아도 핵심만 파악할 수 있도록, 글에서 가장 중요한 사실 2~4개를
    짧은 문장으로 뽑으세요 (요약 박스에 그대로 노출됩니다. 본문 문장을 그대로 복사하지
    말고 간결하게 다시 쓰세요).
+
+${TONE_GUIDE}
 
 ${ANTI_AI_STYLE_GUIDE}
 
@@ -83,10 +82,13 @@ function buildReviewPrompt(body) {
 본문에 [[IMAGE: ...]] 형식의 표식이 있다면 절대 고치거나 지우거나 위치를 옮기지
 마세요. 그 줄은 그대로 유지한 채 주변 문장만 다듬으세요.
 
+${TONE_GUIDE}
+
 ${ANTI_AI_STYLE_GUIDE}
 
 위 기준에 걸리는 문장이 하나라도 있으면 반드시 고치세요. 특히 정보성 글은 "첫째/둘째",
-깔끔한 요약형 결론으로 흐르기 쉬우니 더 엄격하게 점검하세요.
+깔끔한 요약형 결론으로 흐르기 쉬우니 더 엄격하게 점검하세요. 존댓말/반말이 한 문단
+안에서 섞여 있는지 특히 꼼꼼히 확인하세요 — 가장 자주 지적된 문제입니다.
 
 [초안]
 ${body}

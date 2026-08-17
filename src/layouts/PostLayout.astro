@@ -35,7 +35,7 @@ const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'lo
     </div>
     {data.keyTakeaways && data.keyTakeaways.length > 0 && (
       <div class="post__summary">
-        <p class="post__summary-label">핵심 요약</p>
+        <p class="post__summary-label">Summary</p>
         <ul>
           {data.keyTakeaways.map((point) => (
             <li>{point}</li>
@@ -94,6 +94,7 @@ const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'lo
 
   .post__cover :global(img) {
     width: 100%;
+    height: auto;
     border-radius: 12px;
   }
 
@@ -114,6 +115,7 @@ const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'lo
 
   .post__content :global(img) {
     width: 100%;
+    height: auto;
     border-radius: 12px;
     margin-top: 0.5em;
   }
@@ -124,6 +126,27 @@ const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'lo
     color: var(--text-muted);
     margin-top: -0.8em;
     margin-bottom: 1.4em;
+  }
+
+  .post__content :global(strong) {
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .post__content :global(u) {
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+  }
+
+  .post__content :global(ul),
+  .post__content :global(ol) {
+    margin: 0 0 1.4em;
+    padding-left: 22px;
+  }
+
+  .post__content :global(li) {
+    margin-bottom: 0.4em;
   }
 
   .post__summary {
