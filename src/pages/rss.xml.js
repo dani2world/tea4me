@@ -7,8 +7,8 @@ export async function GET(context) {
   );
 
   return rss({
-    title: '차로 하루를 편집하는 사람',
-    description: '티 소믈리에가 동양철학과 개인적 시선으로 재구성한 차 이야기',
+    title: 'TEA for ME',
+    description: '차에 관한 이야기와 직접 마셔본 차의 기록, 그리고 차를 마시며 만난 순간들을 담습니다.',
     site: context.site,
     trailingSlash: false,
     items: posts.map((post) => ({
