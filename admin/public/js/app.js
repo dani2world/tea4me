@@ -284,3 +284,23 @@ publishBtn.addEventListener('click', async () => {
     publishBtn.disabled = false;
   }
 });
+
+// ---- 페이지를 새로 열어도 대기 중인 초안을 이어서 편집할 수 있게 자동으로 불러오기 ----
+
+(async () => {
+  const res = await fetch('/api/experience/pending');
+  const { postId } = await res.json();
+  if (postId) {
+    currentPostId = postId;
+    await loadEditor();
+  }
+})();
+
+(async () => {
+  const res = await fetch('/api/info/pending');
+  const { postId } = await res.json();
+  if (postId) {
+    currentInfoPostId = postId;
+    await loadInfoEditor();
+  }
+})();

@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
-const { postWorkDir } = require('../paths');
+const { postWorkDir, DATA_POSTS_DIR } = require('../paths');
 
 function newPostId() {
   return randomUUID();
@@ -50,4 +50,19 @@ function writeContent(postId, content) {
   writeJsonSafe(contentPath(postId), content);
 }
 
-module.exports = { newPostId, readStatus, writeStatus, readContent, writeContent };
+// 브라우저를 닫았다 다시 열어도(혹은 다른 방식으로 파이프라인이 트리거됐어도)
+// 편집을 이어갈 수 있도록, 아직 발행되지 않은 채 준비된 초안을 찾아준다.
+function findLatestReadyPost(kind) {
+  if (!fs.existsSync(DATA_POSTS_DIR)) return null;
+
+  const candidates = fs
+    .readdirSync(DATA_POSTS_DIR, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => ({ id: entry.name, status: readStatus(entry.name) }))
+    .filter(({ status }) => status.kind === kind && status.stage === 'ready')
+    .sort((a, b) => new Date(b.status.updatedAt) - new Date(a.status.updatedAt));
+
+  return candidates[0]?.id || null;
+}
+
+module.exports = { newPostId, readStatus, writeStatus, readContent, writeContent, findLatestReadyPost };
