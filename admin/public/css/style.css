@@ -79,6 +79,15 @@ body {
   margin-top: 24px;
 }
 
+.banner {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.banner strong {
+  color: var(--accent);
+}
+
 .field {
   display: block;
   margin-bottom: 14px;

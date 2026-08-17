@@ -36,7 +36,7 @@ router.post('/', upload.array('photos', 10), (req, res) => {
     path.join(postWorkDir(postId), 'input.json'),
     JSON.stringify({ memo, photoFilenames, createdAt: new Date().toISOString() }, null, 2),
   );
-  writeStatus(postId, { stage: 'uploaded', progress: 5 });
+  writeStatus(postId, { kind: 'experience', stage: 'uploaded', progress: 5 });
 
   runExperiencePipeline({ postId, memo, photoFilenames });
 

@@ -1,3 +1,23 @@
+// ---- 오늘 글 발행 대시보드 ----
+
+async function loadDashboardBanner() {
+  const banner = document.getElementById('dashboard-banner');
+  try {
+    const res = await fetch('/api/dashboard/today');
+    const data = await res.json();
+    if (data.recommendation === 'experience') {
+      const list = data.readyExperiencePosts.map((p) => `「${p.title}」`).join(', ');
+      banner.innerHTML = `<strong>오늘은 준비된 경험/리뷰 글이 있습니다.</strong> ${list} — 이 글을 먼저 발행하세요.`;
+    } else {
+      banner.innerHTML = `<strong>준비된 경험/리뷰 글이 없습니다.</strong> 오늘은 정보성 글로 공백을 채워보세요.`;
+    }
+  } catch (err) {
+    banner.textContent = '대시보드 정보를 불러오지 못했습니다.';
+  }
+}
+
+loadDashboardBanner();
+
 const btn = document.getElementById('test-publish-btn');
 const result = document.getElementById('test-publish-result');
 
@@ -217,6 +237,7 @@ infoPublishBtn.addEventListener('click', async () => {
     const json = await res.json();
     if (json.ok) {
       infoPublishResult.textContent = `발행 완료: ${json.slug} (1~2분 후 사이트에 반영됩니다)`;
+      loadDashboardBanner();
     } else {
       infoPublishResult.textContent = `실패: ${json.error}`;
     }
@@ -253,6 +274,7 @@ publishBtn.addEventListener('click', async () => {
     const json = await res.json();
     if (json.ok) {
       publishResult.textContent = `발행 완료: ${json.slug} (1~2분 후 사이트에 반영됩니다)`;
+      loadDashboardBanner();
     } else {
       publishResult.textContent = `실패: ${json.error}`;
     }

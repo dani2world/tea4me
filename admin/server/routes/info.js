@@ -15,7 +15,7 @@ const EDITABLE_FIELDS = ['title', 'category', 'tags', 'excerpt', 'body', 'coverI
 router.post('/generate', (req, res) => {
   const postId = newPostId();
   postWorkDir(postId);
-  writeStatus(postId, { stage: 'queued', progress: 0 });
+  writeStatus(postId, { kind: 'info', stage: 'queued', progress: 0 });
 
   runInfoPipeline({ postId });
 

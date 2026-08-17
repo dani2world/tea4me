@@ -6,6 +6,7 @@ const { DATA_POSTS_DIR } = require('./paths');
 const testRoutes = require('./routes/test');
 const experienceRoutes = require('./routes/experience');
 const infoRoutes = require('./routes/info');
+const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
 const PORT = process.env.PORT || 3010;
@@ -16,6 +17,7 @@ app.use('/data/posts', express.static(DATA_POSTS_DIR));
 app.use('/api', testRoutes);
 app.use('/api/experience', experienceRoutes);
 app.use('/api/info', infoRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`관리자 웹앱 실행 중: http://localhost:${PORT}`);
