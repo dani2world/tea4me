@@ -13,6 +13,40 @@
 
   <main class="main">
     <section class="card">
+      <h2>경험/리뷰 글 작성</h2>
+      <p class="muted">사진과 메모를 올리면 AI가 초안을 씁니다. 편집 후 직접 발행하세요.</p>
+
+      <form id="experience-form">
+        <label class="field">
+          <span>사진 (여러 장 가능)</span>
+          <input type="file" id="photos-input" name="photos" accept="image/*" multiple required />
+        </label>
+        <label class="field">
+          <span>메모</span>
+          <textarea id="memo-input" name="memo" rows="4" placeholder="오늘 마신 차, 장소, 느낀 점을 자유롭게 적어주세요." required></textarea>
+        </label>
+        <button type="submit" class="btn" id="experience-submit-btn">초안 생성</button>
+      </form>
+
+      <div id="experience-progress" class="progress" hidden>
+        <p id="experience-progress-text" class="muted"></p>
+      </div>
+
+      <div id="experience-editor" class="editor" hidden>
+        <img id="editor-cover-preview" class="editor-cover" alt="" />
+        <label class="field"><span>제목</span><input type="text" id="editor-title" /></label>
+        <label class="field"><span>카테고리</span><input type="text" id="editor-category" /></label>
+        <label class="field"><span>태그 (쉼표로 구분)</span><input type="text" id="editor-tags" /></label>
+        <label class="field"><span>요약</span><textarea id="editor-excerpt" rows="2"></textarea></label>
+        <label class="field"><span>본문</span><textarea id="editor-body" rows="12"></textarea></label>
+        <label class="field"><span>표지 이미지 대체 텍스트</span><input type="text" id="editor-alt" /></label>
+        <label class="field"><span>나의 한마디 (선택)</span><textarea id="editor-humannote" rows="2"></textarea></label>
+        <button type="button" class="btn" id="publish-btn">발행하기</button>
+        <p id="publish-result" class="result"></p>
+      </div>
+    </section>
+
+    <section class="card">
       <h2>발행 파이프라인 테스트</h2>
       <p class="muted">
         경험/정보성 글 파이프라인이 붙기 전, git push 배관이 실제로 동작하는지

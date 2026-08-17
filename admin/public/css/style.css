@@ -74,3 +74,55 @@ body {
   font-size: 13px;
   white-space: pre-wrap;
 }
+
+.card + .card {
+  margin-top: 24px;
+}
+
+.field {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.field span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.progress {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.editor {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.editor-cover {
+  width: 100%;
+  max-width: 360px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: block;
+}
