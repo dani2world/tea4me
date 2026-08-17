@@ -6,17 +6,30 @@ const CLAUDE_CLI = process.env.CLAUDE_CLI || 'claude';
 // 셸 실행이나 파일 쓰기 같은 부작용이 있는 도구는 전부 막아둔다.
 const DISALLOWED_TOOLS = ['Bash', 'Edit', 'Write', 'NotebookEdit', 'WebFetch', 'WebSearch', 'Agent'];
 
-/**
- * `claude -p`를 서브프로세스로 실행해 프롬프트를 stdin으로 넘기고 최종 텍스트를 반환한다.
- * API 과금이 아니라 로컬에 로그인된 Claude Code CLI 구독 세션을 사용한다.
- */
-function runClaude({ prompt, cwd, timeoutMs = 180000 }) {
+// Windows에서 claude -> claude.cmd -> claude.exe로 두 단계를 거쳐 실행되는데,
+// 백신 실시간 검사 등으로 프로세스 생성 자체가 가끔 실패한다 (출력 없이 바로
+// 종료, 흔히 0xC0000142 같은 Windows STATUS 코드). Claude의 응답 문제가
+// 아니라 OS 레벨의 일시적 오류이므로 재시도하면 대부분 바로 성공한다.
+const SPAWN_FAILURE_RETRIES = 2;
+const SPAWN_FAILURE_RETRY_DELAY_MS = 1500;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function runClaudeOnce({ prompt, cwd, timeoutMs }) {
   return new Promise((resolve, reject) => {
+    // shell:true(Windows에서 .cmd 실행에 필요)는 Node가 배열 인자를 자동으로
+    // 이스케이프해주지 않고 공백으로만 이어붙인다 — 그래서 공백이 든 값은
+    // 직접 따옴표로 감싸야 하나의 인자로 전달된다 (안 그러면 disallowedTools
+    // 뒤 단어들이 전부 별도의 낱개 인자로 흩어짐).
+    const disallowedToolsValue = DISALLOWED_TOOLS.join(' ');
     const args = [
       '-p',
       '--output-format', 'json',
       '--permission-mode', 'bypassPermissions',
-      '--disallowedTools', DISALLOWED_TOOLS.join(' '),
+      '--disallowedTools',
+      process.platform === 'win32' ? `"${disallowedToolsValue}"` : disallowedToolsValue,
     ];
 
     const child = spawn(CLAUDE_CLI, args, {
@@ -43,7 +56,9 @@ function runClaude({ prompt, cwd, timeoutMs = 180000 }) {
     child.on('close', (code) => {
       clearTimeout(timer);
       if (!stdout.trim()) {
-        return reject(new Error(`claude -p가 출력 없이 종료됐습니다 (code ${code}): ${stderr.trim()}`));
+        const err = new Error(`claude -p가 출력 없이 종료됐습니다 (code ${code}): ${stderr.trim()}`);
+        err.emptyOutput = true;
+        return reject(err);
       }
       let parsed;
       try {
@@ -62,6 +77,26 @@ function runClaude({ prompt, cwd, timeoutMs = 180000 }) {
   });
 }
 
+/**
+ * `claude -p`를 서브프로세스로 실행해 프롬프트를 stdin으로 넘기고 최종 텍스트를 반환한다.
+ * API 과금이 아니라 로컬에 로그인된 Claude Code CLI 구독 세션을 사용한다.
+ * 출력 없이 프로세스가 죽는 OS 레벨 스폰 실패는 자동으로 재시도한다.
+ */
+async function runClaude({ prompt, cwd, timeoutMs = 180000 }) {
+  let lastErr;
+  for (let attempt = 0; attempt <= SPAWN_FAILURE_RETRIES; attempt++) {
+    try {
+      return await runClaudeOnce({ prompt, cwd, timeoutMs });
+    } catch (err) {
+      lastErr = err;
+      if (!err.emptyOutput || attempt === SPAWN_FAILURE_RETRIES) throw err;
+      console.error(`claude -p 스폰 실패, 재시도 중 (${attempt + 1}/${SPAWN_FAILURE_RETRIES})...`);
+      await sleep(SPAWN_FAILURE_RETRY_DELAY_MS);
+    }
+  }
+  throw lastErr;
+}
+
 function extractJson(text) {
   const trimmed = String(text).trim();
   const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
@@ -69,14 +104,22 @@ function extractJson(text) {
   return JSON.parse(jsonText);
 }
 
+const JSON_PARSE_RETRIES = 1;
+
 /** claude -p 결과 텍스트가 JSON이라고 기대할 때 사용 (프롬프트에서 JSON만 응답하도록 지시해야 함) */
 async function runClaudeJson(opts) {
-  const text = await runClaude(opts);
-  try {
-    return extractJson(text);
-  } catch (e) {
-    throw new Error(`claude -p 결과를 JSON으로 파싱하지 못했습니다: ${text.slice(0, 500)}`);
+  let lastErr;
+  for (let attempt = 0; attempt <= JSON_PARSE_RETRIES; attempt++) {
+    const text = await runClaude(opts);
+    try {
+      return extractJson(text);
+    } catch (e) {
+      lastErr = new Error(`claude -p 결과를 JSON으로 파싱하지 못했습니다: ${text.slice(0, 500)}`);
+      if (attempt === JSON_PARSE_RETRIES) throw lastErr;
+      console.error('claude -p JSON 파싱 실패, 다시 요청 중...');
+    }
   }
+  throw lastErr;
 }
 
 module.exports = { runClaude, runClaudeJson };
