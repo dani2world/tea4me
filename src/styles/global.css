@@ -1,0 +1,121 @@
+@import url('https://cdn.jsdelivr.net/npm/wanted-sans@1.0.3/fonts/webfonts/variable/complete/WantedSansVariable.css');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&display=swap');
+
+:root {
+  --bg: #f7f4ec;
+  --text: #26251f;
+  --text-muted: #55534a;
+  --sage: #8c9a82;
+  --accent: #33513b;
+  --card-bg: #ffffff;
+  --border: #e4dfcf;
+  --tag-experience-bg: #33513b;
+  --tag-experience-text: #f7f4ec;
+  --tag-info-bg: #e4e9df;
+  --tag-info-text: #55694d;
+
+  --font-main: 'Wanted Sans Variable', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+  --font-label: 'Space Grotesk', var(--font-main);
+}
+
+:root[data-theme='dark'] {
+  --bg: #1c1b17;
+  --text: #f5f1e8;
+  --text-muted: #c9c6b8;
+  --sage: #9fae95;
+  --accent: #4c7057;
+  --card-bg: #24231e;
+  --border: #3a382f;
+  --tag-experience-bg: #4c7057;
+  --tag-experience-text: #1c1b17;
+  --tag-info-bg: #2c3229;
+  --tag-info-text: #b9c6ae;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-main);
+  font-weight: 400;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+
+.tag--experience {
+  background: var(--tag-experience-bg);
+  color: var(--tag-experience-text);
+}
+
+.tag--info {
+  background: var(--tag-info-bg);
+  color: var(--tag-info-text);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.btn--primary:hover {
+  opacity: 0.88;
+}
+
+.btn--ghost:hover {
+  border-color: var(--accent);
+}

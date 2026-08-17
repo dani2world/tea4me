@@ -1,18 +1,47 @@
 ---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import PostCard from '../components/PostCard.astro';
 
+const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
 ---
 
-<html lang="ko">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>차로 하루를 편집하는 사람</title>
-	</head>
-	<body>
-		<h1>차로 하루를 편집하는 사람</h1>
-		<p>티 소믈리에의 차 이야기 — 준비 중입니다.</p>
-	</body>
-</html>
+<BaseLayout title="차로 하루를 편집하는 사람">
+  <Hero />
+  <section id="latest" class="container latest">
+    <h2 class="latest__title">모든 글</h2>
+    {posts.length === 0 ? (
+      <p class="latest__empty">아직 발행된 글이 없습니다. 곧 첫 글로 찾아옵니다.</p>
+    ) : (
+      <div class="latest__grid">
+        {posts.map((post) => (
+          <PostCard post={post} />
+        ))}
+      </div>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .latest {
+    padding-bottom: 96px;
+  }
+
+  .latest__title {
+    font-size: 22px;
+    margin-bottom: 28px;
+  }
+
+  .latest__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .latest__empty {
+    color: var(--text-muted);
+  }
+</style>

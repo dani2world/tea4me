@@ -1,0 +1,90 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+}
+
+const { post } = Astro.props;
+const { data } = post;
+const base = import.meta.env.BASE_URL;
+const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' }).format(
+  data.pubDate,
+);
+---
+
+<a class="post-card" href={`${base}/posts/${post.id}`}>
+  <div class="post-card__thumb">
+    <Image src={data.coverImage} alt={data.coverImageAlt} width={480} height={300} />
+  </div>
+  <div class="post-card__body">
+    <div class="post-card__meta">
+      <span class={`tag ${data.type === 'experience' ? 'tag--experience' : 'tag--info'}`}>
+        {data.type === 'experience' ? '경험' : '정보'}
+      </span>
+      <span class="post-card__date">{dateLabel}</span>
+    </div>
+    <h3 class="post-card__title">{data.title}</h3>
+    <p class="post-card__excerpt">{data.excerpt}</p>
+  </div>
+</a>
+
+<style>
+  .post-card {
+    display: block;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+  }
+
+  .post-card:hover {
+    border-color: var(--accent);
+  }
+
+  .post-card__thumb {
+    aspect-ratio: 8 / 5;
+    overflow: hidden;
+    background: var(--border);
+  }
+
+  .post-card__thumb :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .post-card__body {
+    padding: 18px 20px 22px;
+  }
+
+  .post-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .post-card__date {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .post-card__title {
+    font-size: 18px;
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+
+  .post-card__excerpt {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

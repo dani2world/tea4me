@@ -1,0 +1,29 @@
+---
+interface Props {
+  photographer: string;
+  photographerUrl: string;
+  source: 'pexels' | 'unsplash';
+  sourceUrl: string;
+}
+
+const { photographer, photographerUrl, source, sourceUrl } = Astro.props;
+const sourceLabel = source === 'pexels' ? 'Pexels' : 'Unsplash';
+---
+
+<p class="attribution">Photo by <a href={photographerUrl} target="_blank" rel="noopener noreferrer">{photographer}</a> on <a href={sourceUrl} target="_blank" rel="noopener noreferrer">{sourceLabel}</a></p>
+
+<style>
+  .attribution {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+
+  .attribution a {
+    text-decoration: underline;
+  }
+
+  .attribution a:hover {
+    color: var(--accent);
+  }
+</style>
