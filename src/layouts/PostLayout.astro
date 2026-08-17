@@ -33,6 +33,17 @@ const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'lo
     <div class="post__content">
       <slot />
     </div>
+    {data.keyTakeaways && data.keyTakeaways.length > 0 && (
+      <div class="post__summary">
+        <p class="post__summary-label">핵심 요약</p>
+        <ul>
+          {data.keyTakeaways.map((point) => (
+            <li>{point}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+    {data.humanNote && <blockquote class="post__note">"{data.humanNote}"</blockquote>}
     {data.tags.length > 0 && (
       <ul class="post__tags">
         {data.tags.map((tag) => (
@@ -115,16 +126,45 @@ const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'lo
     margin-bottom: 1.4em;
   }
 
-  .post__content :global(blockquote) {
-    margin: 2em 0;
+  .post__summary {
+    margin: 2.5em 0 1.5em;
+    padding: 18px 22px;
+    background: var(--tag-info-bg);
+    border-radius: 12px;
+  }
+
+  .post__summary-label {
+    font-family: var(--font-label);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tag-info-text);
+    margin-bottom: 10px;
+  }
+
+  .post__summary ul {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--text);
+  }
+
+  .post__summary li {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .post__summary li + li {
+    margin-top: 6px;
+  }
+
+  .post__note {
+    margin: 1.5em 0 2.5em;
     padding-left: 20px;
     border-left: 3px solid var(--accent);
     font-style: italic;
+    font-size: 16px;
     color: var(--text-muted);
-  }
-
-  .post__content :global(blockquote p) {
-    margin-bottom: 0;
   }
 
   .post__tags {

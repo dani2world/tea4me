@@ -100,10 +100,9 @@ router.post('/:id/publish', async (req, res) => {
       author: '티소믈리에',
       ...(humanNote ? { humanNote } : {}),
     };
-    const body = humanNote ? `${content.body}\n\n> "${humanNote}"` : content.body;
     const coverImageSourcePath = path.join(postWorkDir(postId), 'edited_images', 'cover.jpg');
 
-    const { postDir } = writePost({ data, body, coverImageSourcePath });
+    const { postDir } = writePost({ data, body: content.body, coverImageSourcePath });
     await publish({ postDir, message: `경험/리뷰 글 발행: ${data.title}` });
 
     writeStatus(postId, { stage: 'published', progress: 100 });

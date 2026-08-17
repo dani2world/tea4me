@@ -35,6 +35,8 @@ const posts = defineCollection({
           .optional(),
 
         author: z.string().default('티소믈리에'),
+        // 한마디 인용구 위에 보여줄 핵심 요약 박스 (2~4개 항목). 주로 정보성 글에 사용.
+        keyTakeaways: z.array(z.string()).optional(),
         // 운영자가 직접 쓴 한 문장 — 정보성 글의 발행 게이트 근거
         humanNote: z.string().optional(),
         draft: z.boolean().default(false),

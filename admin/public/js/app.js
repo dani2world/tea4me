@@ -197,6 +197,7 @@ async function loadInfoEditor() {
   document.getElementById('info-excerpt').value = content.excerpt || '';
   document.getElementById('info-body').value = content.body || '';
   document.getElementById('info-alt').value = content.coverImageAlt || '';
+  document.getElementById('info-takeaways').value = (content.keyTakeaways || []).join('\n');
   infoHumanNoteInput.value = content.humanNote || '';
 
   updateInfoGate();
@@ -222,6 +223,7 @@ infoPublishBtn.addEventListener('click', async () => {
     excerpt: document.getElementById('info-excerpt').value.trim(),
     body: document.getElementById('info-body').value.trim(),
     coverImageAlt: document.getElementById('info-alt').value.trim(),
+    keyTakeaways: document.getElementById('info-takeaways').value.split('\n').map((t) => t.trim()).filter(Boolean),
     humanNote: infoHumanNoteInput.value.trim(),
   };
 

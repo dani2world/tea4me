@@ -48,6 +48,10 @@ body {
   font-weight: 400;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  /* 한글은 word-break: keep-all이 없으면 단어 중간에서도 줄바꿈됨 —
+     어절(의미 단위) 단위로만 줄이 바뀌도록 강제 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 h1, h2, h3 {

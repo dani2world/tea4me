@@ -17,7 +17,7 @@ const router = express.Router();
 
 // coverImageAttribution·slug는 AI/Pexels가 정한 값 그대로 유지 — 사람이 편집하는 건
 // 글의 내용/태그/한마디뿐이다.
-const EDITABLE_FIELDS = ['title', 'category', 'tags', 'excerpt', 'body', 'coverImageAlt', 'humanNote'];
+const EDITABLE_FIELDS = ['title', 'category', 'tags', 'excerpt', 'body', 'coverImageAlt', 'humanNote', 'keyTakeaways'];
 
 router.post('/generate', (req, res) => {
   const postId = newPostId();
@@ -86,15 +86,15 @@ router.post('/:id/publish', async (req, res) => {
       coverImageFocalPoint: content.coverImageFocalPoint || { x: 0.5, y: 0.5 },
       author: '티소믈리에',
       humanNote,
+      ...(content.keyTakeaways?.length ? { keyTakeaways: content.keyTakeaways } : {}),
     };
-    const body = `${content.body}\n\n> "${humanNote}"`;
     const coverImageSourcePath = path.join(postWorkDir(postId), 'edited_images', 'cover.jpg');
     const extraImages = (content.inlineImages || []).map((img) => ({
       sourcePath: img.editedImagePath,
       filename: img.filename,
     }));
 
-    const { postDir } = writePost({ data, body, coverImageSourcePath, extraImages });
+    const { postDir } = writePost({ data, body: content.body, coverImageSourcePath, extraImages });
     await publish({ postDir, message: `정보성 글 발행: ${data.title}` });
 
     writeStatus(postId, { stage: 'published', progress: 100 });

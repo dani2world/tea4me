@@ -46,6 +46,9 @@ ${covered}
    [[IMAGE: 영문 검색어 2~4단어 | 한글 캡션 한 문장]]
    검색어는 인물 얼굴이 나오지 않을 만한 사물/클로즈업 위주로 고르세요
    (예: "tea leaves close up"은 좋고 "person drinking tea"는 얼굴이 나올 수 있어 피하세요).
+6. 본문을 다 읽지 않아도 핵심만 파악할 수 있도록, 글에서 가장 중요한 사실 2~4개를
+   짧은 문장으로 뽑으세요 (요약 박스에 그대로 노출됩니다. 본문 문장을 그대로 복사하지
+   말고 간결하게 다시 쓰세요).
 
 ${ANTI_AI_STYLE_GUIDE}
 
@@ -58,7 +61,8 @@ ${ANTI_AI_STYLE_GUIDE}
   "excerpt": "200자 이내 요약",
   "body": "마크다운 본문 (문단 사이 빈 줄, [[IMAGE: ...]] 표식 포함 가능)",
   "coverImageQuery": "Pexels 검색용 영문 키워드",
-  "coverImageAlt": "표지 이미지 대체 텍스트"
+  "coverImageAlt": "표지 이미지 대체 텍스트",
+  "keyTakeaways": ["핵심 사실 1", "핵심 사실 2", "핵심 사실 3"]
 }`;
 }
 
@@ -173,6 +177,7 @@ async function runInfoPipeline({ postId }) {
       coverImageAttribution: attribution,
       coverImageFocalPoint: focal,
       inlineImages,
+      keyTakeaways: draft.keyTakeaways || [],
       humanNote: '',
     });
     writeStatus(postId, { stage: 'ready', progress: 100 });
