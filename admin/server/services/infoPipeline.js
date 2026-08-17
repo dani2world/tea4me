@@ -97,8 +97,13 @@ ${body}
 { "body": "다듬어진 마크다운 본문 ([[IMAGE: ...]] 표식은 그대로 유지)" }`;
 }
 
-/** 본문의 [[IMAGE: query | caption]] 표식을 검증된 실제 이미지로 치환한다. */
-async function resolveInlineImages(body, { originalDir, editedDir }) {
+/**
+ * 본문의 [[IMAGE: query | caption]] 표식을 검증된 실제 이미지로 치환한다.
+ * usedPhotoIds는 표지 이미지 등 이미 이 글에서 채택된 Pexels 사진 id 모음으로,
+ * 검색어가 달라도 같은 사진이 본문에 중복 삽입되지 않도록 후보에서 제외하는 데
+ * 쓰인다. 새로 채택되는 사진의 id도 이 Set에 계속 추가된다.
+ */
+async function resolveInlineImages(body, { originalDir, editedDir, usedPhotoIds }) {
   const matches = [...body.matchAll(IMAGE_MARKER_RE)].slice(0, MAX_INLINE_IMAGES);
   const inlineImages = [];
   let resolvedBody = body;
@@ -110,11 +115,13 @@ async function resolveInlineImages(body, { originalDir, editedDir }) {
     const filename = `inline-${i}.jpg`;
 
     try {
-      const { path: sourcePath, attribution } = await searchAndDownloadVetted({
+      const { path: sourcePath, photoId, attribution } = await searchAndDownloadVetted({
         query,
         cwd: originalDir,
         finalFilename: `inline-${i}-source.jpg`,
+        excludeIds: usedPhotoIds,
       });
+      usedPhotoIds.add(photoId);
       const editedPath = path.join(editedDir, filename);
       await processImage({ inputPath: sourcePath, outputPath: editedPath });
 
@@ -147,11 +154,13 @@ async function runInfoPipeline({ postId }) {
     const draft = await runClaudeJson({ cwd: dir, prompt: buildTopicDraftPrompt(publishedPosts) });
 
     writeStatus(postId, { stage: 'sourcing_image', progress: 30 });
-    const { path: coverSourcePath, attribution } = await searchAndDownloadVetted({
+    const usedPhotoIds = new Set();
+    const { path: coverSourcePath, photoId: coverPhotoId, attribution } = await searchAndDownloadVetted({
       query: draft.coverImageQuery,
       cwd: originalDir,
       finalFilename: 'cover-source.jpg',
     });
+    usedPhotoIds.add(coverPhotoId);
 
     writeStatus(postId, { stage: 'planning_image', progress: 45 });
     const focal = await runClaudeJson({ cwd: originalDir, prompt: buildFocalPrompt('cover-source.jpg') });
@@ -166,6 +175,7 @@ async function runInfoPipeline({ postId }) {
     const { body: finalBody, inlineImages } = await resolveInlineImages(reviewed.body || draft.body, {
       originalDir,
       editedDir,
+      usedPhotoIds,
     });
 
     writeContent(postId, {

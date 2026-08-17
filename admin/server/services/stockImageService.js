@@ -62,10 +62,13 @@ function buildVettingPrompt(filename) {
  * 첫 번째 이미지를 채택한다 (초상권·저작권 문제 회피). cwd는 claude가
  * Read 도구로 후보 파일을 열어볼 수 있는 폴더여야 하고, finalFilename은
  * 그 폴더 안에서 채택된 이미지가 최종적으로 저장될 파일명이다.
+ * excludeIds는 같은 글 안에서 이미 채택된 Pexels 사진 id들로, 검색어가
+ * 달라도 같은 사진이 표지/본문에 중복 삽입되는 것을 막기 위해 후보에서
+ * 제외한다.
  */
-async function searchAndDownloadVetted({ query, cwd, finalFilename }) {
+async function searchAndDownloadVetted({ query, cwd, finalFilename, excludeIds = new Set() }) {
   const result = await pexelsSearch(query);
-  const candidates = result.photos || [];
+  const candidates = (result.photos || []).filter((photo) => !excludeIds.has(photo.id));
   if (!candidates.length) {
     throw new Error(`"${query}"에 대한 Pexels 검색 결과가 없습니다.`);
   }
@@ -83,6 +86,7 @@ async function searchAndDownloadVetted({ query, cwd, finalFilename }) {
       fs.renameSync(candidatePath, finalPath);
       return {
         path: finalPath,
+        photoId: photo.id,
         attribution: {
           photographer: photo.photographer,
           photographerUrl: photo.photographer_url,
