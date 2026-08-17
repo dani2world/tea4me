@@ -27,7 +27,7 @@ const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'lo
     </div>
     <h1 class="post__title">{data.title}</h1>
     <div class="post__cover">
-      <Image src={data.coverImage} alt={data.coverImageAlt} width={960} height={600} />
+      <Image src={data.coverImage} alt={data.coverImageAlt} width={960} />
       {data.coverImageAttribution && <AttributionBadge {...data.coverImageAttribution} />}
     </div>
     <div class="post__content">
@@ -99,6 +99,32 @@ const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'lo
   .post__content :global(h2) {
     font-size: 22px;
     margin: 2em 0 0.8em;
+  }
+
+  .post__content :global(img) {
+    width: 100%;
+    border-radius: 12px;
+    margin-top: 0.5em;
+  }
+
+  .post__content :global(em) {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: -0.8em;
+    margin-bottom: 1.4em;
+  }
+
+  .post__content :global(blockquote) {
+    margin: 2em 0;
+    padding-left: 20px;
+    border-left: 3px solid var(--accent);
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  .post__content :global(blockquote p) {
+    margin-bottom: 0;
   }
 
   .post__tags {

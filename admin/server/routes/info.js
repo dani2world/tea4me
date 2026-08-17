@@ -83,13 +83,18 @@ router.post('/:id/publish', async (req, res) => {
       coverImage: './cover.jpg',
       coverImageAlt: content.coverImageAlt,
       coverImageAttribution: content.coverImageAttribution,
+      coverImageFocalPoint: content.coverImageFocalPoint || { x: 0.5, y: 0.5 },
       author: '티소믈리에',
       humanNote,
     };
-    const body = `${content.body}\n\n티소믈리에의 한마디: ${humanNote}`;
+    const body = `${content.body}\n\n> "${humanNote}"`;
     const coverImageSourcePath = path.join(postWorkDir(postId), 'edited_images', 'cover.jpg');
+    const extraImages = (content.inlineImages || []).map((img) => ({
+      sourcePath: img.editedImagePath,
+      filename: img.filename,
+    }));
 
-    const { postDir } = writePost({ data, body, coverImageSourcePath });
+    const { postDir } = writePost({ data, body, coverImageSourcePath, extraImages });
     await publish({ postDir, message: `정보성 글 발행: ${data.title}` });
 
     writeStatus(postId, { stage: 'published', progress: 100 });

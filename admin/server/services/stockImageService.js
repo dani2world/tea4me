@@ -1,9 +1,11 @@
 const https = require('node:https');
 const fs = require('node:fs');
+const path = require('node:path');
+const { runClaudeJson } = require('./claudeRunner');
 
 const PEXELS_SEARCH_URL = 'https://api.pexels.com/v1/search';
 
-function pexelsSearch(query, perPage = 5) {
+function pexelsSearch(query, perPage = 6) {
   return new Promise((resolve, reject) => {
     const apiKey = process.env.PEXELS_API_KEY;
     if (!apiKey) {
@@ -45,23 +47,54 @@ function downloadImage(url, outputPath) {
   });
 }
 
-/**
- * 검색어로 Pexels에서 무료 이미지를 검색해 다운로드하고, 출처 표기 정보를 반환한다.
- * (Unsplash와 달리 사용마다 별도 다운로드-추적 API 호출이 필요 없어 관리가 단순함)
- */
-async function searchAndDownload(query, outputPath) {
-  const result = await pexelsSearch(query);
-  const photo = result.photos?.[0];
-  if (!photo) throw new Error(`"${query}"에 대한 Pexels 검색 결과가 없습니다.`);
+function buildVettingPrompt(filename) {
+  return `Read 도구로 "${filename}" 이미지를 열어보세요 (현재 작업 폴더에 있습니다).
+이 이미지에 다음 중 하나라도 해당하면 사용할 수 없습니다:
+- 식별 가능한 사람의 얼굴이 나온다 (초상권 문제)
+- 워터마크, 로고, 텍스트 오버레이가 찍혀 있다
 
-  await downloadImage(photo.src.large2x || photo.src.large, outputPath);
-
-  return {
-    photographer: photo.photographer,
-    photographerUrl: photo.photographer_url,
-    source: 'pexels',
-    sourceUrl: photo.url,
-  };
+다음 JSON 스키마로만 응답하세요 (다른 텍스트 없이):
+{ "usable": true 또는 false, "reason": "판단 이유 한 줄" }`;
 }
 
-module.exports = { searchAndDownload };
+/**
+ * 검색어로 Pexels 후보 이미지들을 순서대로 내려받아, 얼굴/워터마크가 없는
+ * 첫 번째 이미지를 채택한다 (초상권·저작권 문제 회피). cwd는 claude가
+ * Read 도구로 후보 파일을 열어볼 수 있는 폴더여야 하고, finalFilename은
+ * 그 폴더 안에서 채택된 이미지가 최종적으로 저장될 파일명이다.
+ */
+async function searchAndDownloadVetted({ query, cwd, finalFilename }) {
+  const result = await pexelsSearch(query);
+  const candidates = result.photos || [];
+  if (!candidates.length) {
+    throw new Error(`"${query}"에 대한 Pexels 검색 결과가 없습니다.`);
+  }
+
+  for (let i = 0; i < candidates.length; i++) {
+    const photo = candidates[i];
+    const candidateFilename = `_candidate-${Date.now()}-${i}.jpg`;
+    const candidatePath = path.join(cwd, candidateFilename);
+
+    await downloadImage(photo.src.large2x || photo.src.large, candidatePath);
+    const verdict = await runClaudeJson({ cwd, prompt: buildVettingPrompt(candidateFilename) });
+
+    if (verdict.usable) {
+      const finalPath = path.join(cwd, finalFilename);
+      fs.renameSync(candidatePath, finalPath);
+      return {
+        path: finalPath,
+        attribution: {
+          photographer: photo.photographer,
+          photographerUrl: photo.photographer_url,
+          source: 'pexels',
+          sourceUrl: photo.url,
+        },
+      };
+    }
+    fs.unlinkSync(candidatePath);
+  }
+
+  throw new Error(`"${query}"에 대해 얼굴/워터마크 없는 이미지를 찾지 못했습니다.`);
+}
+
+module.exports = { searchAndDownloadVetted };

@@ -96,10 +96,11 @@ router.post('/:id/publish', async (req, res) => {
       excerpt: content.excerpt,
       coverImage: './cover.jpg',
       coverImageAlt: content.coverImageAlt,
+      coverImageFocalPoint: content.coverImageFocalPoint || { x: 0.5, y: 0.5 },
       author: '티소믈리에',
       ...(humanNote ? { humanNote } : {}),
     };
-    const body = humanNote ? `${content.body}\n\n티소믈리에의 한마디: ${humanNote}` : content.body;
+    const body = humanNote ? `${content.body}\n\n> "${humanNote}"` : content.body;
     const coverImageSourcePath = path.join(postWorkDir(postId), 'edited_images', 'cover.jpg');
 
     const { postDir } = writePost({ data, body, coverImageSourcePath });

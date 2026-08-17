@@ -44,8 +44,8 @@ ${ANTI_AI_STYLE_GUIDE}
 
 function buildFocalPrompt(photoFilename) {
   return `Read 도구로 "${photoFilename}" 사진을 열어보세요 (현재 작업 폴더에 있습니다).
-이 사진을 8:5 가로 비율로 크롭할 때, 가장 중요한 피사체가 잘리지 않도록 하는
-포커스 포인트를 0~1 비율 좌표로 알려주세요.
+이 사진이 홈 화면 카드 목록에서 8:5 가로 비율로 크롭되어 보일 때, 가장 중요한
+피사체가 잘리지 않도록 하는 포커스 포인트를 0~1 비율 좌표로 알려주세요.
 
 다음 JSON 스키마로만 응답하세요:
 { "x": 0.5, "y": 0.5 }`;
@@ -85,7 +85,6 @@ async function runExperiencePipeline({ postId, memo, photoFilenames }) {
     await processImage({
       inputPath: path.join(originalDir, draft.coverPhoto),
       outputPath: path.join(editedDir, 'cover.jpg'),
-      focal,
     });
 
     writeStatus(postId, { stage: 'reviewing', progress: 80 });
@@ -99,6 +98,7 @@ async function runExperiencePipeline({ postId, memo, photoFilenames }) {
       excerpt: draft.excerpt,
       body: reviewed.body || draft.body,
       coverImageAlt: draft.coverImageAlt,
+      coverImageFocalPoint: focal,
       humanNote: '',
     });
     writeStatus(postId, { stage: 'ready', progress: 100 });

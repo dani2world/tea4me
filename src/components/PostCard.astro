@@ -12,11 +12,17 @@ const base = import.meta.env.BASE_URL;
 const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' }).format(
   data.pubDate,
 );
+const focal = data.coverImageFocalPoint;
 ---
 
 <a class="post-card" href={`${base}/posts/${post.id}`}>
   <div class="post-card__thumb">
-    <Image src={data.coverImage} alt={data.coverImageAlt} width={480} height={300} />
+    <Image
+      src={data.coverImage}
+      alt={data.coverImageAlt}
+      width={480}
+      style={`object-position: ${focal.x * 100}% ${focal.y * 100}%`}
+    />
   </div>
   <div class="post-card__body">
     <div class="post-card__meta">

@@ -19,6 +19,11 @@ const posts = defineCollection({
 
         coverImage: image(),
         coverImageAlt: z.string().min(1),
+        // 홈 카드 목록에서 8:5로 크롭할 때 피사체가 잘리지 않게 하는 기준점.
+        // 상세 페이지에서는 크롭하지 않고 원본 비율 그대로 보여준다.
+        coverImageFocalPoint: z
+          .object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) })
+          .default({ x: 0.5, y: 0.5 }),
         // 정보성 글의 스톡 이미지에만 필요 (경험 글은 본인 사진이라 해당 없음)
         coverImageAttribution: z
           .object({
