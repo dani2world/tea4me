@@ -10,8 +10,11 @@ const DISALLOWED_TOOLS = ['Bash', 'Edit', 'Write', 'NotebookEdit', 'WebFetch', '
 // 백신 실시간 검사 등으로 프로세스 생성 자체가 가끔 실패한다 (출력 없이 바로
 // 종료, 흔히 0xC0000142 같은 Windows STATUS 코드). Claude의 응답 문제가
 // 아니라 OS 레벨의 일시적 오류이므로 재시도하면 대부분 바로 성공한다.
-const SPAWN_FAILURE_RETRIES = 2;
-const SPAWN_FAILURE_RETRY_DELAY_MS = 1500;
+// 다만 실제로 짧은 시간 안에 재시도 전부(3회)가 함께 실패하는 사례가 있었음 —
+// 스캔이 몇 초씩 걸리는 경우 고정 1.5초 간격으로는 그 창을 못 피하므로,
+// 시도 횟수를 늘리고 지수 백오프(1.5s, 3s, 6s, 12s)로 늘려서 회피 여유를 준다.
+const SPAWN_FAILURE_RETRIES = 4;
+const SPAWN_FAILURE_RETRY_BASE_DELAY_MS = 1500;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -90,8 +93,9 @@ async function runClaude({ prompt, cwd, timeoutMs = 180000 }) {
     } catch (err) {
       lastErr = err;
       if (!err.emptyOutput || attempt === SPAWN_FAILURE_RETRIES) throw err;
-      console.error(`claude -p 스폰 실패, 재시도 중 (${attempt + 1}/${SPAWN_FAILURE_RETRIES})...`);
-      await sleep(SPAWN_FAILURE_RETRY_DELAY_MS);
+      const delay = SPAWN_FAILURE_RETRY_BASE_DELAY_MS * 2 ** attempt;
+      console.error(`claude -p 스폰 실패, ${delay}ms 후 재시도 (${attempt + 1}/${SPAWN_FAILURE_RETRIES})...`);
+      await sleep(delay);
     }
   }
   throw lastErr;

@@ -27,6 +27,7 @@ pnpm-debug.log*
 admin/node_modules/
 admin/data/
 admin/.env
+admin/server.log
 
 # local Claude Code session state
 .claude/
