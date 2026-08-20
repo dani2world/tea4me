@@ -3,7 +3,7 @@ const path = require('node:path');
 const yaml = require('js-yaml');
 const { CONTENT_TEAS_FILE } = require('../paths');
 
-const LINE_FIELDS = ['whyPicked', 'goodPoints', 'howToBrew', 'snackPairing', 'comfortMessage'];
+const LINE_FIELDS = ['intro', 'whyPicked', 'goodPoints', 'howToBrew', 'snackPairing', 'comfortMessage'];
 
 function readCatalog() {
   if (!fs.existsSync(CONTENT_TEAS_FILE)) return [];

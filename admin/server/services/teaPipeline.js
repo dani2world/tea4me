@@ -13,7 +13,7 @@ const CATEGORY_PROMPT_LABELS = {
   comfortMessage: '오늘 하루를 보내는 사람에게 건네는 위로 한마디',
 };
 
-function buildTeaDraftPrompt({ name, category, seasons, selectedCategories, existingCatalog }) {
+function buildTeaDraftPrompt({ name, category, seasons, weatherTags, selectedCategories, existingCatalog }) {
   const covered = existingCatalog.length
     ? existingCatalog.map((t) => `- ${t.name} (${(t.seasons || []).join('/')})`).join('\n')
     : '(아직 없음)';
@@ -32,9 +32,16 @@ ${covered}
 이름: ${name}
 카테고리: ${category || '(미지정)'}
 어울리는 계절: ${(seasons || []).join(', ') || '전체'}
+어울리는 날씨: ${(weatherTags || []).join(', ') || '(미지정)'}
 
-[써야 할 카테고리별 후보 문구]
-${categoryAsks}
+[반드시 써야 할 것 — "intro"]
+이 차 이름과 계절/날씨감을 자연스럽게 녹여 쓴, 여운을 남기는 도입부 한 줄. 완결된
+문장이 아니라 "..."로 끝을 흐리는 형태로 씁니다. 후보 2~3개.
+예시: "비가 흩뿌리는 늦여름, 맑고도 쌉싸름한 센차를.."
+예시: "눈이 소복이 쌓이는 날, 향신료 향 가득한 마살라 차이를.."
+
+[선택된 카테고리별 후보 문구]
+${categoryAsks || '(없음)'}
 
 ${TONE_GUIDE}
 
@@ -44,8 +51,9 @@ ${ANTI_AI_STYLE_GUIDE}
 마크다운을 렌더링하지 않으므로 **볼드**, <u>밑줄</u> 같은 마크다운/HTML 문법을 절대
 쓰지 마세요 — 그냥 일반 텍스트로만 작성하세요.
 
-다음 JSON 스키마로만 응답하세요 (요청된 카테고리 키만 포함, 각 값은 문자열 배열):
-{ ${selectedCategories.map((k) => `"${k}": ["...", "..."]`).join(', ')} }`;
+다음 JSON 스키마로만 응답하세요 ("intro"는 항상 포함, 그 외엔 요청된 카테고리 키만
+포함, 각 값은 문자열 배열):
+{ "intro": ["...", "..."]${selectedCategories.length ? ', ' : ''}${selectedCategories.map((k) => `"${k}": ["...", "..."]`).join(', ')} }`;
 }
 
 async function runTeaDraft({ postId, name, category, seasons, weatherTags, selectedCategories }) {
@@ -54,7 +62,7 @@ async function runTeaDraft({ postId, name, category, seasons, weatherTags, selec
     const existingCatalog = readCatalog();
     const draft = await runClaudeJson({
       cwd: process.cwd(),
-      prompt: buildTeaDraftPrompt({ name, category, seasons, selectedCategories, existingCatalog }),
+      prompt: buildTeaDraftPrompt({ name, category, seasons, weatherTags, selectedCategories, existingCatalog }),
     });
 
     writeContent(postId, {

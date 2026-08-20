@@ -60,12 +60,18 @@ router.post('/:id/publish', async (req, res) => {
     return res.status(400).json({ ok: false, error: '슬러그와 이름이 필요합니다.' });
   }
 
+  const intro = content.intro || [];
+  if (intro.length === 0) {
+    return res.status(400).json({ ok: false, error: '"intro" 문구가 최소 1개 있어야 합니다.' });
+  }
+
   const entry = {
     slug,
     name: content.name,
     category: content.category,
     seasons: content.seasons?.length ? content.seasons : ['전체'],
     weatherTags: content.weatherTags || [],
+    intro,
     whyPicked: content.whyPicked || [],
     goodPoints: content.goodPoints || [],
     howToBrew: content.howToBrew || [],

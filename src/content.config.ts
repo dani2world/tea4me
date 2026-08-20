@@ -62,6 +62,9 @@ const teas = defineCollection({
       // v1 선택 로직은 이 필드를 쓰지 않는다 — 나중에 실시간 날씨 연동 시
       // 카탈로그를 다시 쓰지 않고 바로 쓰기 위해 스키마만 미리 마련해둔다.
       weatherTags: z.array(z.enum(['rainy', 'snowy', 'hot', 'cold', 'humid'])).default([]),
+      // 계절/날씨감을 담아 차 이름을 자연스럽게 녹여 쓰는 도입부 한 줄
+      // (예: "비가 흩뿌리는 늦여름, 맑고도 쌉싸름한 센차를.."). 카드에 항상 노출되므로 필수.
+      intro: z.array(z.string().min(1)).min(1),
       whyPicked: teaLines, // 왜 골랐는지
       goodPoints: teaLines, // 어떤점이 좋은지
       howToBrew: teaLines, // 어떻게 마시면 더 좋은지

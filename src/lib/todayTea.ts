@@ -24,6 +24,7 @@ export interface TeaEntry {
   name: string;
   category?: string;
   seasons: string[];
+  intro: string[];
   whyPicked: string[];
   goodPoints: string[];
   howToBrew: string[];
@@ -34,6 +35,7 @@ export interface TeaEntry {
 
 export interface TodayTeaPick {
   tea: TeaEntry;
+  intro: string;
   category: TeaCategory;
   line: string;
 }
@@ -91,12 +93,14 @@ export function pickTodayTea(catalog: TeaEntry[], dateStr: string): TodayTeaPick
   const tea = pool[hashString(dateStr) % pool.length];
 
   const availableCategories = CATEGORY_KEYS.filter((k) => tea[k].length > 0);
-  if (availableCategories.length === 0) return null; // 스키마 refine으로 사실상 발생 안 함
+  if (availableCategories.length === 0 || tea.intro.length === 0) return null; // 스키마 refine/필수화로 사실상 발생 안 함
+
+  const intro = tea.intro[hashString(`${dateStr}:${tea.slug}:intro`) % tea.intro.length];
 
   const category =
     availableCategories[hashString(`${dateStr}:${tea.slug}`) % availableCategories.length];
   const lines = tea[category];
   const line = lines[hashString(`${dateStr}:${tea.slug}:${category}`) % lines.length];
 
-  return { tea, category, line };
+  return { tea, intro, category, line };
 }

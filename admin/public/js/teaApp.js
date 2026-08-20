@@ -2,6 +2,7 @@
 // src/lib/todayTea.ts의 CATEGORY_LABELS와 값을 맞춰둔 것 — 어드민(CommonJS)과
 // 프런트(Astro/TS) 사이엔 공유 import 경로가 없어 값만 중복해서 유지한다.
 const TEA_CATEGORY_LABELS = {
+  intro: '도입부 (계절/날씨 담은 여운 있는 한 줄)',
   whyPicked: '왜 이 차를 골랐냐면',
   goodPoints: '이 차, 이런 점이 좋아요',
   howToBrew: '이렇게 마시면 더 좋아요',
