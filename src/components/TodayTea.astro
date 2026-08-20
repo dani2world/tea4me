@@ -1,0 +1,85 @@
+---
+import { getCollection } from 'astro:content';
+import { getKSTDateString, pickTodayTea, CATEGORY_LABELS } from '../lib/todayTea';
+
+const entries = await getCollection('teas', ({ data }) => !data.draft);
+const catalog = entries.map((e) => e.data);
+const todayStr = getKSTDateString();
+const pick = pickTodayTea(catalog, todayStr);
+
+// 클라이언트 보정 스크립트가 재계산에 쓸 원본 데이터. </script> 이스케이프로
+// 문구 안에 우연히 "</script"가 섞여도 안전하게.
+const catalogJson = JSON.stringify(catalog).replace(/</g, '\\u003c');
+---
+
+{pick && (
+  <div class="today-tea" data-server-date={todayStr}>
+    <p class="today-tea__label">🍃 오늘의 차</p>
+    <p class="today-tea__name" data-field="name">{pick.tea.name}</p>
+    <p class="today-tea__category" data-field="category">{CATEGORY_LABELS[pick.category]}</p>
+    <p class="today-tea__line" data-field="line">{pick.line}</p>
+  </div>
+)}
+
+<script type="application/json" id="tea-catalog-data" set:html={catalogJson} />
+
+<script type="module">
+  import { getKSTDateString, pickTodayTea, CATEGORY_LABELS } from '../lib/todayTea';
+
+  const root = document.querySelector('.today-tea');
+  if (root) {
+    const serverDate = root.dataset.serverDate;
+    const clientDate = getKSTDateString();
+    // 대부분의 방문은 빌드 당일이라 여기서 끝 — 깜빡임 없음.
+    if (clientDate !== serverDate) {
+      const dataEl = document.getElementById('tea-catalog-data');
+      const catalog = JSON.parse(dataEl.textContent);
+      const pick = pickTodayTea(catalog, clientDate);
+      if (pick) {
+        root.querySelector('[data-field="name"]').textContent = pick.tea.name;
+        root.querySelector('[data-field="category"]').textContent = CATEGORY_LABELS[pick.category];
+        root.querySelector('[data-field="line"]').textContent = pick.line;
+        root.dataset.serverDate = clientDate;
+      }
+    }
+  }
+</script>
+
+<style>
+  .today-tea {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px var(--shadow);
+    padding: 22px 24px;
+    max-width: 320px;
+  }
+
+  .today-tea__label {
+    font-family: var(--font-label);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .today-tea__name {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .today-tea__category {
+    font-size: 12px;
+    color: var(--sage);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .today-tea__line {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-muted);
+  }
+</style>

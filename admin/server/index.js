@@ -7,6 +7,7 @@ const testRoutes = require('./routes/test');
 const experienceRoutes = require('./routes/experience');
 const infoRoutes = require('./routes/info');
 const dashboardRoutes = require('./routes/dashboard');
+const teaRoutes = require('./routes/teas');
 
 const app = express();
 const PORT = process.env.PORT || 3010;
@@ -18,6 +19,7 @@ app.use('/api', testRoutes);
 app.use('/api/experience', experienceRoutes);
 app.use('/api/info', infoRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/teas', teaRoutes);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`관리자 웹앱 실행 중: http://localhost:${PORT}`);

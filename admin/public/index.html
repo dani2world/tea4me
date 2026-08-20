@@ -82,6 +82,62 @@
     </section>
 
     <section class="card">
+      <h2>오늘의 차 등록</h2>
+      <p class="muted">
+        메인 페이지 히어로 영역에 매일 하나씩 뽑혀 노출되는 "오늘의 차" 목록에 항목을
+        추가합니다. 계절/카테고리별로 AI가 후보 문구를 써주면 검토·수정 후 등록하세요.
+      </p>
+
+      <form id="tea-form">
+        <label class="field"><span>차 이름</span><input type="text" id="tea-name" required /></label>
+        <label class="field"><span>카테고리 (예: 녹차, 홍차)</span><input type="text" id="tea-category" /></label>
+
+        <fieldset class="field">
+          <legend>어울리는 계절</legend>
+          <label><input type="checkbox" name="tea-season" value="봄" /> 봄</label>
+          <label><input type="checkbox" name="tea-season" value="여름" /> 여름</label>
+          <label><input type="checkbox" name="tea-season" value="가을" /> 가을</label>
+          <label><input type="checkbox" name="tea-season" value="겨울" /> 겨울</label>
+          <label><input type="checkbox" name="tea-season" value="전체" /> 전체(계절 무관)</label>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend>날씨 태그 (선택, 지금은 위젯에 미반영 — 추후 확장용)</legend>
+          <label><input type="checkbox" name="tea-weather" value="rainy" /> 비</label>
+          <label><input type="checkbox" name="tea-weather" value="snowy" /> 눈</label>
+          <label><input type="checkbox" name="tea-weather" value="hot" /> 폭염</label>
+          <label><input type="checkbox" name="tea-weather" value="cold" /> 한파</label>
+          <label><input type="checkbox" name="tea-weather" value="humid" /> 습함</label>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend>이번에 AI가 문구를 써줄 항목 (하나 이상 선택)</legend>
+          <label><input type="checkbox" name="tea-cat" value="whyPicked" /> 왜 골랐는지</label>
+          <label><input type="checkbox" name="tea-cat" value="goodPoints" /> 어떤 점이 좋은지</label>
+          <label><input type="checkbox" name="tea-cat" value="howToBrew" /> 어떻게 마시면 더 좋은지</label>
+          <label><input type="checkbox" name="tea-cat" value="snackPairing" /> 어울리는 다식</label>
+          <label><input type="checkbox" name="tea-cat" value="comfortMessage" /> 그 날의 위로글</label>
+        </fieldset>
+
+        <button type="submit" class="btn" id="tea-generate-btn">문구 생성</button>
+      </form>
+
+      <div id="tea-progress" class="progress" hidden>
+        <p id="tea-progress-text" class="muted"></p>
+      </div>
+
+      <div id="tea-editor" class="editor" hidden>
+        <div id="tea-candidates"></div>
+        <label class="field">
+          <span>슬러그 (영문 kebab-case, 목록 안에서 고유해야 함)</span>
+          <input type="text" id="tea-slug" placeholder="예: earl-grey-winter" required />
+        </label>
+        <button type="button" class="btn" id="tea-publish-btn">등록하기</button>
+        <p id="tea-publish-result" class="result"></p>
+      </div>
+    </section>
+
+    <section class="card">
       <h2>발행 파이프라인 테스트</h2>
       <p class="muted">
         경험/정보성 글 파이프라인이 붙기 전, git push 배관이 실제로 동작하는지
@@ -93,5 +149,6 @@
   </main>
 
   <script src="/js/app.js"></script>
+  <script src="/js/teaApp.js"></script>
 </body>
 </html>

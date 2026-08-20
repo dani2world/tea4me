@@ -1,5 +1,5 @@
 import { defineCollection, z } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { glob, file } from 'astro/loaders';
 
 const posts = defineCollection({
   loader: glob({ pattern: 'posts/*/index.md', base: './src/content' }),
@@ -49,4 +49,33 @@ const posts = defineCollection({
       }),
 });
 
-export const collections = { posts };
+const teaLines = z.array(z.string().min(1)).default([]);
+
+const teas = defineCollection({
+  loader: file('src/content/teas/teas.yaml'),
+  schema: z
+    .object({
+      slug: z.string().min(1),
+      name: z.string().min(1),
+      category: z.string().optional(),
+      seasons: z.array(z.enum(['봄', '여름', '가을', '겨울', '전체'])).min(1).default(['전체']),
+      // v1 선택 로직은 이 필드를 쓰지 않는다 — 나중에 실시간 날씨 연동 시
+      // 카탈로그를 다시 쓰지 않고 바로 쓰기 위해 스키마만 미리 마련해둔다.
+      weatherTags: z.array(z.enum(['rainy', 'snowy', 'hot', 'cold', 'humid'])).default([]),
+      whyPicked: teaLines, // 왜 골랐는지
+      goodPoints: teaLines, // 어떤점이 좋은지
+      howToBrew: teaLines, // 어떻게 마시면 더 좋은지
+      snackPairing: teaLines, // 어울리는 다식
+      comfortMessage: teaLines, // 그 날의 위로글
+      draft: z.boolean().default(false),
+    })
+    .refine(
+      (d) =>
+        [d.whyPicked, d.goodPoints, d.howToBrew, d.snackPairing, d.comfortMessage].some(
+          (arr) => arr.length > 0,
+        ),
+      { message: '적어도 하나의 카테고리에는 문구가 있어야 합니다.' },
+    ),
+});
+
+export const collections = { posts, teas };

@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const ADMIN_ROOT = path.resolve(__dirname, '..');
 const REPO_ROOT = path.resolve(ADMIN_ROOT, '..');
 const CONTENT_POSTS_DIR = path.join(REPO_ROOT, 'src', 'content', 'posts');
+const CONTENT_TEAS_FILE = path.join(REPO_ROOT, 'src', 'content', 'teas', 'teas.yaml');
 const DATA_DIR = path.join(ADMIN_ROOT, 'data');
 const DATA_POSTS_DIR = path.join(DATA_DIR, 'posts');
 
@@ -20,6 +21,7 @@ module.exports = {
   ADMIN_ROOT,
   REPO_ROOT,
   CONTENT_POSTS_DIR,
+  CONTENT_TEAS_FILE,
   DATA_DIR,
   DATA_POSTS_DIR,
   ensureDir,

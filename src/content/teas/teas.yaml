@@ -1,0 +1,207 @@
+# "오늘의 차" 위젯이 참조하는 큐레이션 목록.
+# 클라이언트에서 그날 날짜(KST)로 결정적으로 하나를 골라 보여준다 —
+# src/lib/todayTea.ts의 pickTodayTea() 참고.
+# 어드민 도구(admin/)로 계속 추가/수정 가능. 풀이 얇으면 같은 차가 며칠 안에
+# 반복되니 틈틈이 늘려주는 걸 추천.
+
+- slug: ujeon-nokcha
+  name: 우전 녹차
+  category: 녹차
+  seasons: [봄]
+  weatherTags: []
+  goodPoints:
+    - "곡우 전에 딴 첫물차라 떫은맛이 거의 없고 감칠맛이 도드라져요."
+  howToBrew:
+    - "물을 70도 정도로 식혀서 우리면 쓴맛 없이 단맛만 살아나요."
+
+- slug: baekhoeunchim
+  name: 백호은침
+  category: 백차
+  seasons: [봄, 여름]
+  weatherTags: []
+  whyPicked:
+    - "가공을 거의 안 거친 차라, 딱 이 계절 찻잎 향을 제일 가깝게 느낄 수 있어서 골랐어요."
+  howToBrew:
+    - "은백색 솜털이 있는 찻잎이라 물을 세게 부으면 쉽게 흩어져요, 살살 부어주세요."
+
+- slug: jasmine-tea
+  name: 자스민차
+  category: 녹차
+  seasons: [봄]
+  weatherTags: []
+  goodPoints:
+    - "녹차에 재스민 꽃향을 입힌 차라, 향만으로도 기분이 환기돼요."
+  comfortMessage:
+    - "오늘 하루도 애쓰셨어요, 잠깐 창문 열고 향 한 모금 먼저 맡아보세요."
+
+- slug: sencha
+  name: 센차
+  category: 녹차
+  seasons: [봄, 여름]
+  weatherTags: []
+  goodPoints:
+    - "일본 녹차 중 가장 대중적인 스타일이라 부담 없이 매일 마시기 좋아요."
+  snackPairing:
+    - "쌀과자나 담백한 화과자랑 같이 두면 잘 어울려요."
+
+- slug: gyokuro
+  name: 교쿠로
+  category: 녹차
+  seasons: [봄]
+  weatherTags: []
+  whyPicked:
+    - "수확 전 2~3주간 햇빛을 가려 키운 차라, 봄에 한 번쯤은 그 진한 감칠맛을 느껴보시라고 골랐어요."
+  howToBrew:
+    - "60도 정도 낮은 물로 짧게 우려야 감칠맛이 쓴맛에 묻히지 않아요."
+
+- slug: peppermint-tea
+  name: 페퍼민트차
+  category: 허브차
+  seasons: [여름]
+  weatherTags: [hot]
+  goodPoints:
+    - "카페인이 없어서 늦은 오후에 마셔도 잠에 방해가 안 돼요."
+  comfortMessage:
+    - "더위에 지친 하루, 화한 박하 향으로 잠깐 숨 돌리고 가세요."
+
+- slug: corn-silk-tea
+  name: 옥수수수염차
+  category: 허브차
+  seasons: [여름]
+  weatherTags: [hot]
+  goodPoints:
+    - "구수하고 부담 없는 맛이라 물 대신 벌컥벌컥 마시기 좋아요."
+  howToBrew:
+    - "차게 식혀서 냉장고에 두고 하루 종일 마셔도 좋아요."
+
+- slug: cold-brew-green
+  name: 냉침 녹차
+  category: 녹차
+  seasons: [여름]
+  weatherTags: [hot, humid]
+  whyPicked:
+    - "더운 날 뜨거운 물을 쓰기 싫을 때 골랐어요, 찬물로만 우려도 충분히 맛이 나요."
+  howToBrew:
+    - "찬물에 찻잎을 넣고 냉장고에서 3~4시간 우리면 떫은맛 없이 은은해요."
+
+- slug: hibiscus-tea
+  name: 히비스커스차
+  category: 허브차
+  seasons: [여름]
+  weatherTags: [hot]
+  goodPoints:
+    - "새콤한 맛과 진한 붉은 색이 더운 날 눈으로도 시원하게 느껴져요."
+  snackPairing:
+    - "새콤달콤한 맛이라 요거트나 가벼운 과일이랑 같이 두면 좋아요."
+
+- slug: white-peony-iced
+  name: 백모단 냉침
+  category: 백차
+  seasons: [여름]
+  weatherTags: [hot]
+  howToBrew:
+    - "찬물에 우려도 백차 특유의 은은한 단맛이 잘 살아나요."
+  comfortMessage:
+    - "잠깐이라도 그늘에 앉아서, 미지근해진 마음도 좀 식히고 가세요."
+
+- slug: oolong-tieguanyin
+  name: 철관음
+  category: 우롱차
+  seasons: [가을]
+  weatherTags: []
+  goodPoints:
+    - "청향형 철관음은 꽃향이 진하면서도 뒷맛이 깔끔해서 가을 공기랑 잘 어울려요."
+  howToBrew:
+    - "작은 다관에 찻잎을 넉넉히 넣고 짧게 여러 번 우리면 향이 더 오래 남아요."
+
+- slug: dongfang-meiren
+  name: 동방미인
+  category: 우롱차
+  seasons: [가을, 겨울]
+  weatherTags: []
+  whyPicked:
+    - "벌레가 갉아먹은 찻잎으로 만든다는 그 특유의 꿀향이, 선선해진 날씨엔 유난히 잘 느껴져서 골랐어요."
+  snackPairing:
+    - "꿀향이 진한 차라 담백한 카스텔라 같은 디저트랑 잘 맞아요."
+
+- slug: chrysanthemum-tea
+  name: 국화차
+  category: 허브차
+  seasons: [가을]
+  weatherTags: []
+  goodPoints:
+    - "은은한 단맛과 국화 특유의 향이 있어 식후에 마시기 좋아요."
+  comfortMessage:
+    - "환절기라 몸도 마음도 좀 지칠 시기예요, 따뜻한 한 잔으로 잠깐 쉬어가세요."
+
+- slug: hojicha
+  name: 호지차
+  category: 녹차
+  seasons: [가을, 겨울]
+  weatherTags: [cold]
+  whyPicked:
+    - "녹차를 불에 볶아 만들어서 떫은맛 대신 구수한 향이 나요, 쌀쌀해질 때 생각나는 차라 골랐어요."
+  howToBrew:
+    - "뜨거운 물로 우려도 쓴맛이 잘 안 나서 초보자도 실패하기 어려운 차예요."
+
+- slug: earl-grey
+  name: 얼그레이
+  category: 홍차
+  seasons: [겨울, 가을]
+  weatherTags: [rainy, cold]
+  whyPicked:
+    - "쌀쌀한 날엔 베르가못 향이 유난히 또렷하게 느껴져서 골랐어요."
+  howToBrew:
+    - "우유를 살짝 섞으면 베르가못 향이 부드러워져요, 밀크티로도 잘 어울려요."
+  snackPairing:
+    - "버터 스콘이나 파운드케이크랑 같이 두면 좋아요."
+
+- slug: puerh-shou
+  name: 숙차
+  category: 보이차·흑차
+  seasons: [겨울]
+  weatherTags: [cold]
+  goodPoints:
+    - "발효도가 높아 맛이 부드럽고 속이 편해서 겨울에 자주 손이 가는 차예요."
+  howToBrew:
+    - "처음 우린 물은 씻어내듯 버리고, 두 번째 우린 물부터 마시면 더 깔끔해요."
+
+- slug: masala-chai
+  name: 마살라 차이
+  category: 홍차
+  seasons: [겨울]
+  weatherTags: [cold, snowy]
+  goodPoints:
+    - "홍차에 계피, 생강 같은 향신료를 우려내서 몸이 금방 따뜻해지는 느낌이 들어요."
+  comfortMessage:
+    - "추운 날 밖에 있다 들어오셨다면, 오늘은 이 한 잔으로 몸부터 녹이세요."
+
+- slug: dianhong
+  name: 전홍
+  category: 홍차
+  seasons: [겨울]
+  weatherTags: [cold]
+  whyPicked:
+    - "윈난에서 나는 홍차라 단맛이 진하고 무게감이 있어서, 추운 날 한 잔 진하게 우려 마시기 좋아 골랐어요."
+  snackPairing:
+    - "단맛이 진한 차라 견과류처럼 짭짤한 간식이랑 오히려 잘 어울려요."
+
+- slug: chamomile-tea
+  name: 캐모마일차
+  category: 허브차
+  seasons: [전체]
+  weatherTags: []
+  goodPoints:
+    - "카페인이 없고 은은한 사과향이 나서, 하루 중 아무 때나 편하게 마실 수 있어요."
+  comfortMessage:
+    - "오늘 하루, 잘 견뎌내셨어요. 딱 한 잔만큼은 아무 생각 없이 쉬어가세요."
+
+- slug: genmaicha
+  name: 현미녹차
+  category: 녹차
+  seasons: [전체]
+  weatherTags: []
+  goodPoints:
+    - "볶은 현미가 섞여 있어 구수한 맛이 강하고, 녹차 특유의 떫은맛은 오히려 덜해요."
+  snackPairing:
+    - "고소한 맛이라 담백한 김밥이나 주먹밥 같은 식사류랑도 잘 어울려요."
