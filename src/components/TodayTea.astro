@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { getKSTDateString, pickTodayTea, CATEGORY_LABELS } from '../lib/todayTea';
+import { getKSTDateString, pickTodayTea, CATEGORY_LABELS, formatDisplayDate } from '../lib/todayTea';
 
 const entries = await getCollection('teas', ({ data }) => !data.draft);
 const catalog = entries.map((e) => e.data);
@@ -14,9 +14,13 @@ const catalogJson = JSON.stringify(catalog).replace(/</g, '\\u003c');
 
 {pick && (
   <div class="today-tea" data-server-date={todayStr}>
-    <p class="today-tea__label">🍃 오늘의 차</p>
-    <p class="today-tea__name" data-field="name">{pick.tea.name}</p>
-    <p class="today-tea__category" data-field="category">{CATEGORY_LABELS[pick.category]}</p>
+    <p class="today-tea__label">
+      <span class="today-tea__leaf">🍃</span> <span data-field="date">{formatDisplayDate(todayStr)}</span> 오늘의 차
+    </p>
+    <div class="today-tea__body">
+      <p class="today-tea__name" data-field="name">{pick.tea.name}</p>
+      <p class="today-tea__category" data-field="category">{CATEGORY_LABELS[pick.category]}</p>
+    </div>
     <p class="today-tea__line" data-field="line">{pick.line}</p>
   </div>
 )}
@@ -24,7 +28,7 @@ const catalogJson = JSON.stringify(catalog).replace(/</g, '\\u003c');
 <script type="application/json" id="tea-catalog-data" set:html={catalogJson} />
 
 <script type="module">
-  import { getKSTDateString, pickTodayTea, CATEGORY_LABELS } from '../lib/todayTea';
+  import { getKSTDateString, pickTodayTea, CATEGORY_LABELS, formatDisplayDate } from '../lib/todayTea';
 
   const root = document.querySelector('.today-tea');
   if (root) {
@@ -36,6 +40,7 @@ const catalogJson = JSON.stringify(catalog).replace(/</g, '\\u003c');
       const catalog = JSON.parse(dataEl.textContent);
       const pick = pickTodayTea(catalog, clientDate);
       if (pick) {
+        root.querySelector('[data-field="date"]').textContent = formatDisplayDate(clientDate);
         root.querySelector('[data-field="name"]').textContent = pick.tea.name;
         root.querySelector('[data-field="category"]').textContent = CATEGORY_LABELS[pick.category];
         root.querySelector('[data-field="line"]').textContent = pick.line;
@@ -52,7 +57,46 @@ const catalogJson = JSON.stringify(catalog).replace(/</g, '\\u003c');
     border-radius: 12px;
     box-shadow: 0 8px 24px var(--shadow);
     padding: 22px 24px;
+    width: 100%;
     max-width: 320px;
+    aspect-ratio: 1 / 1;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    animation:
+      today-tea-in 0.6s ease-out,
+      today-tea-shimmer 6s ease-in-out 0.6s infinite;
+  }
+
+  @keyframes today-tea-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes today-tea-shimmer {
+    0%,
+    100% {
+      border-color: var(--border);
+      box-shadow: 0 8px 24px var(--shadow);
+    }
+    50% {
+      border-color: var(--accent);
+      box-shadow: 0 10px 32px var(--shadow);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .today-tea,
+    .today-tea__leaf {
+      animation: none;
+    }
   }
 
   .today-tea__label {
@@ -61,11 +105,30 @@ const catalogJson = JSON.stringify(catalog).replace(/</g, '\\u003c');
     font-weight: 600;
     letter-spacing: 0.08em;
     color: var(--accent);
-    margin-bottom: 10px;
+  }
+
+  .today-tea__leaf {
+    display: inline-block;
+    animation: today-tea-leaf-float 3s ease-in-out infinite;
+  }
+
+  @keyframes today-tea-leaf-float {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-3px) rotate(-6deg);
+    }
+  }
+
+  .today-tea__body {
+    display: flex;
+    flex-direction: column;
   }
 
   .today-tea__name {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 800;
     margin-bottom: 6px;
   }
@@ -74,7 +137,6 @@ const catalogJson = JSON.stringify(catalog).replace(/</g, '\\u003c');
     font-size: 12px;
     color: var(--sage);
     font-weight: 600;
-    margin-bottom: 8px;
   }
 
   .today-tea__line {

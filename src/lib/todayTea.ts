@@ -48,6 +48,17 @@ export function getKSTDateString(date: Date = new Date()): string {
   }).format(date);
 }
 
+/** 'YYYY-MM-DD' -> '2026. 8. 20. Thu.' 요일은 dateStr을 그대로 UTC 자정으로 해석해
+ * 계산하므로(순수 달력 날짜 연산), 실행 환경의 로컬 타임존과 무관하게 항상 같은 요일이 나온다. */
+export function formatDisplayDate(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const weekday = new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-US', {
+    weekday: 'short',
+    timeZone: 'UTC',
+  });
+  return `${y}. ${m}. ${d}. ${weekday}.`;
+}
+
 export function getSeasonKST(dateStr: string): '봄' | '여름' | '가을' | '겨울' {
   const month = Number(dateStr.slice(5, 7));
   if (month >= 3 && month <= 5) return '봄';
