@@ -5,32 +5,54 @@ const { runClaudeJson } = require('./claudeRunner');
 const { processImage } = require('./imageProcessor');
 const { searchAndDownloadVetted } = require('./stockImageService');
 const { writeStatus, writeContent } = require('./postStore');
-const { listPublishedPosts } = require('./topicRegistry');
+const { listPublishedPosts, listRecentDraftTopics } = require('./topicRegistry');
 const { ANTI_AI_STYLE_GUIDE, TONE_GUIDE } = require('./styleGuide');
 
-const CATEGORIES = ['녹차', '홍차', '우롱차', '보이차·흑차', '백차', '다구·브루잉', '티하우스 리뷰'];
+const CATEGORIES = [
+  '녹차',
+  '홍차',
+  '우롱차',
+  '보이차·흑차',
+  '백차',
+  '다구·브루잉',
+  '티하우스 리뷰',
+  '서양·글로벌 티 문화',
+];
 
 // 본문 중 이미지가 있으면 좋을 지점에 AI가 남기는 표식. 리뷰 패스를 거친 뒤
 // 이 표식을 실제 검증된 이미지로 치환한다.
 const IMAGE_MARKER_RE = /\[\[IMAGE:\s*([^|]+)\|([^\]]+)\]\]/g;
 const MAX_INLINE_IMAGES = 2;
 
-function buildTopicDraftPrompt(publishedPosts) {
+function buildTopicDraftPrompt(publishedPosts, draftTopics) {
   const covered = publishedPosts.length
     ? publishedPosts.map((p) => `- [${p.category}] ${p.title}`).join('\n')
     : '(아직 없음)';
+  const coveredDrafts = draftTopics.length
+    ? draftTopics.map((p) => `- [${p.category || '미지정'}] ${p.title}`).join('\n')
+    : '(없음)';
 
   return `당신은 '차로 하루를 편집하는 사람'이라는 차(Tea) 블로그의 에디터입니다.
 티 소믈리에 자격을 가진 운영자를 대신해, 차에 대한 일반 지식/정보를 다루는
-정보성 글을 씁니다. 담담하고 절제된 톤, 동양철학적 사유를 곁들이되 과장·클릭베이트
-금지. 이미 다룬 주제와 겹치지 않는 새 주제를 스스로 고르세요.
+정보성 글을 씁니다. 차분하고 사려 깊은 톤을 유지하되 과장·클릭베이트 금지.
+이미 다룬 주제와 겹치지 않는 새 주제를 스스로 고르세요.
 
 [이미 발행된 글 목록 - 이 주제들과 겹치지 않게 고르세요]
 ${covered}
 
+[예전에 초안까지 만들었지만 발행하지 않은 주제 - 이것도 피하세요]
+${coveredDrafts}
+
 작업:
 1. 아직 다루지 않은 차 관련 주제를 하나 고르세요 (다음 카테고리 중에서:
    ${CATEGORIES.join(', ')}).
+   차 문화는 동아시아 전통차(산화도, 다구, 발효 공정 등)에만 있지 않습니다 —
+   영국 애프터눈티, 인도 짜이, 터키·모로코 민트티, 러시아 사모바르, 미국식
+   아이스티, 밀크티·버블티 트렌드처럼 전 세계에서 사랑받는 차 문화와 이야기도
+   폭넓게 다루세요. 최근 글들이 계속 동아시아 전통차 위주였다면 이번엔 의도적으로
+   다른 지역·스타일을 골라 균형을 맞추세요. 또한 마니아틱하고 전문적인 디테일보다,
+   차를 잘 모르는 독자도 "어, 이건 읽고 싶다" 싶을 만큼 흥미롭고 대중적인 주제를
+   우선하세요 — 지루하고 뻔한 정보 나열은 피하세요.
 2. 그 주제로 블로그 글 전체를 작성하세요. 문단은 3~5개, 각 문단은 빈 줄로 구분.
 3. 내용은 반드시 공인되거나 검증 가능한 정보만 다루세요. 출처가 불분명한 속설·통념을
    사실처럼 단정하지 마세요. 확실하지 않은 유래·기원설은 "~라는 설이 있으나 확실하지
@@ -155,7 +177,11 @@ async function runInfoPipeline({ postId }) {
   try {
     writeStatus(postId, { stage: 'selecting_topic', progress: 10 });
     const publishedPosts = listPublishedPosts();
-    const draft = await runClaudeJson({ cwd: dir, prompt: buildTopicDraftPrompt(publishedPosts) });
+    const draftTopics = listRecentDraftTopics('info');
+    const draft = await runClaudeJson({
+      cwd: dir,
+      prompt: buildTopicDraftPrompt(publishedPosts, draftTopics),
+    });
 
     writeStatus(postId, { stage: 'sourcing_image', progress: 30 });
     const usedPhotoIds = new Set();
