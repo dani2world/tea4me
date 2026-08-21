@@ -29,13 +29,13 @@ const catalogJson = JSON.stringify(catalog).replace(/</g, '\\u003c');
         <dd class="tea__spec-value tea__spec-value--num" data-field="brewingTip">{pick.brewingTip}</dd>
       </div>
       <div class="tea__spec">
-        <dt>With</dt>
+        <dt>Linger with</dt>
         <dd class="tea__spec-value" data-field="pairing">{pick.pairing}</dd>
       </div>
     </dl>
 
     <p class="tea__moment">
-      <span class="tea__moment-label">Today's moment</span>
+      <span class="tea__moment-flower" aria-hidden="true">🌷</span>
       <span class="tea__moment-text" data-field="moment">{pick.moment}</span>
     </p>
   </article>
@@ -216,21 +216,19 @@ const catalogJson = JSON.stringify(catalog).replace(/</g, '\\u003c');
     font-variant-numeric: tabular-nums;
   }
 
+  /* 라벨 없이 한 줄로 맺는 자리 — 꽃 글리프를 들여쓰기 기준으로 삼아
+     두 줄로 넘어가도 문장이 글리프 아래로 흘러들지 않게 한다. */
   .tea__moment {
     display: flex;
-    flex-direction: column;
-    gap: 5px;
-    padding-top: 17px;
+    align-items: baseline;
+    gap: 7px;
+    padding-top: 16px;
     border-top: 1px solid var(--tea-rule);
   }
 
-  .tea__moment-label {
-    font-family: var(--font-label);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--sage-label);
+  .tea__moment-flower {
+    flex: none;
+    font-size: 13px;
   }
 
   .tea__moment-text {
