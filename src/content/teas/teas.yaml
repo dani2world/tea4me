@@ -4,71 +4,71 @@
 # 같은 계절의 과거 등록분에서 자동으로 하나가 뽑힌다 — src/lib/todayTea.ts 참고.
 
 - slug: tea-2026-04-10
-  name: 문산포종
+  name: 말차
   date: "2026-04-10"
   season: 봄
   situation: 초봄 아침
   mood: 겨울 끝에 공기가 조금씩 부드러워지는 아침
-  message: 오늘은 겨울 끝에 공기가 조금씩 부드러워지는 아침, 문산포종 한 잔 권하고 싶어요. 가볍고 맑은 꽃향과 산뜻한 여운이 새 계절을 가볍게 맞고 싶은 마음에 잘 어울려요.
-  brewingTip: 85~90℃ · 2~3분
+  message: 겨울 끝에 공기가 조금씩 부드러워지는 아침에 어울리는 짙은 감칠맛과 부드러운 쌉싸름함이 천천히 올라와요.
+  brewingTip: 70~80℃ · 차선으로 충분히 휘젓기
   pairing: 화과자
   moment: 새 계절을 가볍게 맞고 싶은 아침
-  sourceNo: 17
+  sourceNo: 8
 - slug: tea-2026-05-02
-  name: 세작 녹차
+  name: 현미녹차
   date: "2026-05-02"
   season: 봄
   situation: 봄꽃 피는 날
   mood: 창밖에 꽃이 하나둘 피기 시작한 날
-  message: 가벼운 설렘을 느끼고 싶은 오늘에는 세작 녹차가 좋아요. 풋풋한 풀향과 산뜻한 감칠맛이 오늘의 공기를 부드럽게 바꿔줘요.
-  brewingTip: 75~80℃ · 2분
-  pairing: 약과
+  message: 구수한 현미 향과 편안한 녹차 맛이 창밖에 꽃이 하나둘 피기 시작한 날과 잘 어울려요.
+  brewingTip: 80℃ 안팎 · 2분
+  pairing: 유과
   moment: 가벼운 설렘을 느끼고 싶은 날
-  sourceNo: 121
+  sourceNo: 125
 - slug: tea-2026-05-20
   name: 황차
   date: "2026-05-20"
   season: 봄
   situation: 늦봄 저녁
   mood: 해가 길어진 저녁
-  message: 오늘의 작은 쉼으로 황차를 추천해요. 은은한 곡물 향과 부드러운 단맛을 느낄 수 있게.
+  message: 은은한 곡물 향과 부드러운 단맛을 느껴보세요.
   brewingTip: 80~85℃ · 2~3분
   pairing: 밤양갱
   moment: 오늘 하루를 부드럽게 접고 싶은 저녁
   sourceNo: 216
 - slug: tea-2026-06-15
-  name: 기문 홍차
+  name: 보성 녹차
   date: "2026-06-15"
   season: 여름
   situation: 초여름 아침
   mood: 아직 공기가 선선한 아침
-  message: 오늘은 기문 홍차를 마시며 계절을 느껴보세요. 아직 공기가 선선한 아침에 어울리는 은은한 꽃향과 부드러운 단맛이 천천히 올라와요.
-  brewingTip: 90~95℃ · 3분
-  pairing: 다크초콜릿
+  message: 아직 공기가 선선한 아침에 어울리는 담백한 풀향과 깔끔한 감칠맛이 천천히 올라와요.
+  brewingTip: 75~80℃ · 2분
+  pairing: 다식
   moment: 하루를 서두르기보다 맑게 열고 싶은 아침
-  sourceNo: 262
+  sourceNo: 246
 - slug: tea-2026-07-08
-  name: 캐모마일
+  name: 호지차
   date: "2026-07-08"
   season: 여름
   situation: 장마
   mood: 비가 오래 이어지는 날
-  message: 오늘 같은 비가 오래 이어지는 날에는 캐모마일을 골라보세요. 부드럽고 포근한 꽃향이 마음에 작은 여백을 만들어줘요.
-  brewingTip: 90~95℃ · 4~5분
-  pairing: 꿀쿠키
+  message: 비가 오래 이어지는 날의 분위기와 구수하고 따뜻한 볶은 향이 잘 어울려요.
+  brewingTip: 85~90℃ · 30초~1분
+  pairing: 카스텔라
   moment: 눅눅한 하루에 산뜻한 기분을 더하고 싶은 날
-  sourceNo: 392
+  sourceNo: 369
 - slug: tea-2026-07-29
-  name: 기문 홍차
+  name: 센차
   date: "2026-07-29"
   season: 여름
   situation: 한여름 아침
   mood: 이른 시간부터 공기가 따뜻한 날
-  message: 오늘의 작은 쉼으로 기문 홍차를 추천해요. 은은한 꽃향과 부드러운 단맛을 느낄 수 있게.
-  brewingTip: 90~95℃ · 3분
-  pairing: 다크초콜릿
+  message: 이른 시간부터 공기가 따뜻한 날의 분위기와 맑고 산뜻한 풀향과 깔끔한 감칠맛이 잘 어울려요.
+  brewingTip: 70~80℃ · 1분
+  pairing: 양갱
   moment: 가볍지만 또렷하게 하루를 시작하고 싶은 아침
-  sourceNo: 462
+  sourceNo: 451
 - slug: tea-2026-08-21
   name: 벽라춘
   date: "2026-08-21"

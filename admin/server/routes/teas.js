@@ -1,100 +1,108 @@
 const express = require('express');
-const { postWorkDir, CONTENT_TEAS_FILE } = require('../paths');
-const {
-  newPostId,
-  readStatus,
-  readContent,
-  writeContent,
-  writeStatus,
-  findLatestReadyPost,
-} = require('../services/postStore');
-const { runTeaDraft } = require('../services/teaPipeline');
+const { CONTENT_TEAS_FILE } = require('../paths');
+const { getSituations, pickCandidate, updateRow } = require('../services/teaPool');
 const { readCatalog, writeTea } = require('../services/teaWriter');
 const { publish } = require('../services/gitPublisher');
 
 const router = express.Router();
 
+/** KST 기준 오늘 날짜 'YYYY-MM-DD'. */
+function todayKST() {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+}
+
+// 슬러그는 하루 한 잔이라는 규칙에서 바로 나온다 — 운영자가 따로 입력할 게 없다.
+function slugForDate(dateStr) {
+  return `tea-${dateStr}`;
+}
+
 router.get('/', (req, res) => {
   res.json(readCatalog());
 });
 
-router.post('/generate', (req, res) => {
-  const { name, category, seasons, weatherTags, selectedCategories } = req.body;
-  if (!name || !selectedCategories?.length) {
-    return res.status(400).json({ ok: false, error: '이름과 최소 1개 카테고리가 필요합니다.' });
+/** 어드민 필터가 그릴 계절 → 상황 트리 */
+router.get('/pool/situations', async (req, res) => {
+  try {
+    res.json(await getSituations());
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
   }
-  const postId = newPostId();
-  postWorkDir(postId);
-  writeStatus(postId, { kind: 'tea', stage: 'queued', progress: 0 });
-  runTeaDraft({ postId, name, category, seasons, weatherTags, selectedCategories });
-  res.json({ ok: true, postId });
 });
 
-router.get('/pending', (req, res) => {
-  res.json({ postId: findLatestReadyPost('tea') });
+/** 조건에 맞는 후보 한 건 뽑기. "다시 가져오기"는 exclude로 방금 본 걸 걸러낸다. */
+router.get('/pool/pick', async (req, res) => {
+  const { season, situation, exclude } = req.query;
+  const excludeNos = String(exclude || '')
+    .split(',')
+    .map((n) => Number(n))
+    .filter(Number.isFinite);
+
+  try {
+    const candidate = await pickCandidate({ season, situation, excludeNos });
+    if (!candidate) {
+      return res.status(404).json({ ok: false, error: '조건에 맞는 후보가 추천풀에 없습니다.' });
+    }
+    res.json({ ok: true, candidate, today: todayKST() });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
 });
 
-router.get('/:id/status', (req, res) => {
-  res.json(readStatus(req.params.id));
-});
+/** 고른 후보를 오늘의 차로 등록 — teas.yaml에 쓰고, 수정분은 추천풀에도 되돌려 쓴다. */
+router.post('/publish', async (req, res) => {
+  const { no, name, message, brewingTip, pairing, moment, season, situation, mood } = req.body;
 
-router.get('/:id', (req, res) => {
-  const content = readContent(req.params.id);
-  if (!content) return res.status(404).json({ ok: false, error: '아직 초안이 준비되지 않았습니다.' });
-  res.json(content);
-});
+  const missing = [
+    ['차 이름', name],
+    ['한마디', message],
+    ['Brewing Tip', brewingTip],
+    ['With', pairing],
+    ["Today's moment", moment],
+  ]
+    .filter(([, value]) => !String(value || '').trim())
+    .map(([label]) => label);
 
-// 후보 중 운영자가 고른/수정한 최종 문구로 덮어쓰기
-router.patch('/:id', (req, res) => {
-  const current = readContent(req.params.id) || {};
-  writeContent(req.params.id, { ...current, ...req.body });
-  res.json({ ok: true });
-});
-
-router.post('/:id/publish', async (req, res) => {
-  const content = readContent(req.params.id);
-  if (!content) return res.status(404).json({ ok: false, error: '초안을 찾을 수 없습니다.' });
-
-  const slug = (content.slug || '').trim();
-  if (!slug || !content.name) {
-    return res.status(400).json({ ok: false, error: '슬러그와 이름이 필요합니다.' });
+  if (missing.length > 0) {
+    return res.status(400).json({ ok: false, error: `${missing.join(', ')} 항목이 비어 있습니다.` });
   }
 
-  const intro = content.intro || [];
-  if (intro.length === 0) {
-    return res.status(400).json({ ok: false, error: '"intro" 문구가 최소 1개 있어야 합니다.' });
-  }
-
+  const date = todayKST();
   const entry = {
-    slug,
-    name: content.name,
-    category: content.category,
-    seasons: content.seasons?.length ? content.seasons : ['전체'],
-    weatherTags: content.weatherTags || [],
-    intro,
-    whyPicked: content.whyPicked || [],
-    goodPoints: content.goodPoints || [],
-    howToBrew: content.howToBrew || [],
-    snackPairing: content.snackPairing || [],
-    comfortMessage: content.comfortMessage || [],
+    slug: slugForDate(date),
+    name: name.trim(),
+    date,
+    season: season || '전체',
+    situation,
+    mood,
+    message: message.trim(),
+    brewingTip: brewingTip.trim(),
+    pairing: pairing.trim(),
+    moment: moment.trim(),
+    sourceNo: Number(no) || undefined,
   };
-
-  const hasAnyLine = [
-    entry.whyPicked,
-    entry.goodPoints,
-    entry.howToBrew,
-    entry.snackPairing,
-    entry.comfortMessage,
-  ].some((arr) => arr.length > 0);
-  if (!hasAnyLine) {
-    return res.status(400).json({ ok: false, error: '적어도 하나의 카테고리에는 문구가 있어야 합니다.' });
-  }
 
   try {
     writeTea(entry);
-    await publish({ postDir: CONTENT_TEAS_FILE, message: `오늘의 차 등록: ${entry.name}` });
-    writeStatus(req.params.id, { stage: 'published', progress: 100 });
-    res.json({ ok: true, slug });
+
+    // 엑셀 되돌려쓰기는 실패해도 발행 자체를 막지 않는다 (파일이 엑셀로 열려 있는 등).
+    let poolUpdated = true;
+    let poolError = null;
+    if (entry.sourceNo) {
+      try {
+        await updateRow(entry.sourceNo, { name, message, brewingTip, pairing, moment });
+      } catch (err) {
+        poolUpdated = false;
+        poolError = err.message;
+      }
+    }
+
+    await publish({ postDir: CONTENT_TEAS_FILE, message: `오늘의 차 등록: ${entry.name} (${date})` });
+    res.json({ ok: true, slug: entry.slug, date, poolUpdated, poolError });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }

@@ -49,36 +49,31 @@ const posts = defineCollection({
       }),
 });
 
-const teaLines = z.array(z.string().min(1)).default([]);
-
+// "오늘의 차" 카드 한 장 = 이 컬렉션의 항목 하나.
+// 어드민의 추천풀(admin/data/todayTeaPool.xlsx)에서 골라 등록하면 여기에 쌓인다.
+// 등록 시 그날 날짜(date)에 고정되고, 등록을 건너뛴 날은 같은 계절의 과거 등록분에서
+// 자동으로 하나가 뽑힌다 — src/lib/todayTea.ts의 pickTodayTea() 참고.
 const teas = defineCollection({
   loader: file('src/content/teas/teas.yaml'),
-  schema: z
-    .object({
-      slug: z.string().min(1),
-      name: z.string().min(1),
-      category: z.string().optional(),
-      seasons: z.array(z.enum(['봄', '여름', '가을', '겨울', '전체'])).min(1).default(['전체']),
-      // v1 선택 로직은 이 필드를 쓰지 않는다 — 나중에 실시간 날씨 연동 시
-      // 카탈로그를 다시 쓰지 않고 바로 쓰기 위해 스키마만 미리 마련해둔다.
-      weatherTags: z.array(z.enum(['rainy', 'snowy', 'hot', 'cold', 'humid'])).default([]),
-      // 계절/날씨감을 담아 차 이름을 자연스럽게 녹여 쓰는 도입부 한 줄
-      // (예: "비가 흩뿌리는 늦여름, 맑고도 쌉싸름한 센차를.."). 카드에 항상 노출되므로 필수.
-      intro: z.array(z.string().min(1)).min(1),
-      whyPicked: teaLines, // 왜 골랐는지
-      goodPoints: teaLines, // 어떤점이 좋은지
-      howToBrew: teaLines, // 어떻게 마시면 더 좋은지
-      snackPairing: teaLines, // 어울리는 다식
-      comfortMessage: teaLines, // 그 날의 위로글
-      draft: z.boolean().default(false),
-    })
-    .refine(
-      (d) =>
-        [d.whyPicked, d.goodPoints, d.howToBrew, d.snackPairing, d.comfortMessage].some(
-          (arr) => arr.length > 0,
-        ),
-      { message: '적어도 하나의 카테고리에는 문구가 있어야 합니다.' },
-    ),
+  schema: z.object({
+    slug: z.string().min(1),
+    name: z.string().min(1),
+    // 이 항목이 "오늘의 차"로 고정 노출될 날짜 (KST, YYYY-MM-DD)
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    season: z.enum(['봄', '여름', '가을', '겨울', '전체']).default('전체'),
+    // 추천풀의 "상황·시기"/"오늘의 분위기". 카드에는 안 나오지만 폴백 선택과
+    // 어드민에서 어떤 조건으로 고른 항목인지 되짚는 데 쓴다.
+    situation: z.string().optional(),
+    mood: z.string().optional(),
+    // 카드 본문 — 그날의 분위기와 차의 특징을 잇는 한 문장
+    message: z.string().min(1),
+    brewingTip: z.string().min(1), // 예: "90~95℃ · 3분"
+    pairing: z.string().min(1), // 예: "레몬 마들렌"
+    moment: z.string().min(1), // 예: "답답한 마음을 환기하고 싶은 오후"
+    // 되돌아가 고칠 수 있게 남겨두는 추천풀 행 번호
+    sourceNo: z.number().int().positive().optional(),
+    draft: z.boolean().default(false),
+  }),
 });
 
 export const collections = { posts, teas };

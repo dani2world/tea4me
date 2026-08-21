@@ -25,7 +25,10 @@ pnpm-debug.log*
 
 # admin webapp (local-only, never deployed)
 admin/node_modules/
-admin/data/
+# 작업 산출물은 제외하되, "오늘의 차" 추천풀은 소스 데이터라 버전 관리에 남긴다.
+# (등록할 때마다 자동 커밋되지는 않는다 — gitPublisher는 teas.yaml만 커밋한다)
+admin/data/*
+!admin/data/todayTeaPool.xlsx
 admin/.env
 admin/server.log
 

@@ -13,35 +13,59 @@ const catalogJson = JSON.stringify(catalog).replace(/</g, '\\u003c');
 ---
 
 {pick && (
-  <div class="today-tea" data-server-date={todayStr}>
-    <p class="today-tea__label">
-      <span class="today-tea__leaf">🍃</span> <span data-field="date">{formatDisplayDate(todayStr)}</span> 오늘의 차
+  <article class="tea" data-server-date={todayStr}>
+    <p class="tea__label">
+      <span class="tea__leaf" aria-hidden="true">🍃</span>
+      <span>오늘의 차</span>
+      <span class="tea__date" data-field="date">{formatDisplayDate(todayStr)}</span>
     </p>
-    <p class="today-tea__name" data-field="name">{pick.tea.name}</p>
-    <p class="today-tea__intro" data-field="intro">{pick.intro}</p>
-    <p class="today-tea__line" data-field="line">🌷 {pick.line}</p>
-  </div>
+
+    <h2 class="tea__name" data-field="name">{pick.name}</h2>
+    <p class="tea__message" data-field="message">{pick.message}</p>
+
+    <dl class="tea__specs">
+      <div class="tea__spec">
+        <dt>Brewing Tip</dt>
+        <dd class="tea__spec-value tea__spec-value--num" data-field="brewingTip">{pick.brewingTip}</dd>
+      </div>
+      <div class="tea__spec">
+        <dt>With</dt>
+        <dd class="tea__spec-value" data-field="pairing">{pick.pairing}</dd>
+      </div>
+    </dl>
+
+    <p class="tea__moment">
+      <span class="tea__moment-label">Today's moment</span>
+      <span class="tea__moment-text" data-field="moment">{pick.moment}</span>
+    </p>
+  </article>
 )}
 
 <script type="application/json" id="tea-catalog-data" set:html={catalogJson} />
 
-<script type="module">
+<script>
   import { getKSTDateString, pickTodayTea, formatDisplayDate } from '../lib/todayTea';
 
-  const root = document.querySelector('.today-tea');
+  const root = document.querySelector<HTMLElement>('.tea');
   if (root) {
     const serverDate = root.dataset.serverDate;
     const clientDate = getKSTDateString();
     // 대부분의 방문은 빌드 당일이라 여기서 끝 — 깜빡임 없음.
     if (clientDate !== serverDate) {
       const dataEl = document.getElementById('tea-catalog-data');
-      const catalog = JSON.parse(dataEl.textContent);
+      const catalog = JSON.parse(dataEl!.textContent!);
       const pick = pickTodayTea(catalog, clientDate);
       if (pick) {
-        root.querySelector('[data-field="date"]').textContent = formatDisplayDate(clientDate);
-        root.querySelector('[data-field="name"]').textContent = pick.tea.name;
-        root.querySelector('[data-field="intro"]').textContent = pick.intro;
-        root.querySelector('[data-field="line"]').textContent = `🌷 ${pick.line}`;
+        const set = (field: string, value: string) => {
+          const el = root.querySelector(`[data-field="${field}"]`);
+          if (el) el.textContent = value;
+        };
+        set('date', formatDisplayDate(clientDate));
+        set('name', pick.name);
+        set('message', pick.message);
+        set('brewingTip', pick.brewingTip);
+        set('pairing', pick.pairing);
+        set('moment', pick.moment);
         root.dataset.serverDate = clientDate;
       }
     }
@@ -49,88 +73,187 @@ const catalogJson = JSON.stringify(catalog).replace(/</g, '\\u003c');
 </script>
 
 <style>
-  .today-tea {
+  .tea {
+    --tea-rule: color-mix(in srgb, var(--sage) 34%, transparent);
+
+    position: relative;
+    overflow: hidden;
     background: var(--card-bg);
-    border-radius: 12px;
-    box-shadow: 0 8px 20px var(--shadow);
-    padding: 22px 24px;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px -12px var(--shadow);
+    padding: 26px 26px 24px;
     width: 100%;
-    max-width: 320px;
-    height: 246px;
-    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    animation:
-      today-tea-in 0.6s ease-out,
-      today-tea-shimmer 5s ease-in-out 0.6s infinite;
+    gap: 18px;
+    animation: tea-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
-  @keyframes today-tea-in {
+  /* 우려낸 찻물이 위쪽에 옅게 배어 있는 느낌 — 카드를 나누지 않고 결만 준다. */
+  .tea::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 140px;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--sage) 13%, transparent),
+      transparent
+    );
+    pointer-events: none;
+  }
+
+  .tea > * {
+    position: relative;
+  }
+
+  /* 진입은 한 번만, 안쪽 요소가 순서대로 따라 들어온다. */
+  @keyframes tea-rise {
     from {
       opacity: 0;
-      transform: translateY(12px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+      transform: translateY(14px);
     }
   }
 
-  @keyframes today-tea-shimmer {
-    0%,
-    100% {
-      box-shadow: 0 6px 14px var(--shadow);
-    }
-    50% {
-      box-shadow: 0 18px 40px var(--shadow);
+  .tea__label,
+  .tea__name,
+  .tea__message,
+  .tea__specs,
+  .tea__moment {
+    animation: tea-settle 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .tea__label { animation-delay: 0.08s; }
+  .tea__name { animation-delay: 0.16s; }
+  .tea__message { animation-delay: 0.24s; }
+  .tea__specs { animation-delay: 0.32s; }
+  .tea__moment { animation-delay: 0.4s; }
+
+  @keyframes tea-settle {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .today-tea,
-    .today-tea__leaf {
-      animation: none;
-    }
-  }
-
-  .today-tea__label {
+  .tea__label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
     font-family: var(--font-label);
     font-size: 12px;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    color: var(--accent);
+    letter-spacing: 0.04em;
+    color: var(--accent-text);
   }
 
-  .today-tea__leaf {
+  .tea__date {
+    margin-left: auto;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+
+  .tea__leaf {
     display: inline-block;
-    animation: today-tea-leaf-float 3s ease-in-out infinite;
+    font-size: 13px;
+    animation: tea-leaf 6s ease-in-out infinite;
   }
 
-  @keyframes today-tea-leaf-float {
-    0%,
-    100% {
-      transform: translateY(0) rotate(0deg);
-    }
-    50% {
-      transform: translateY(-3px) rotate(-6deg);
-    }
+  @keyframes tea-leaf {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-2px) rotate(-7deg); }
   }
 
-  .today-tea__name {
-    font-size: 22px;
+  .tea__name {
+    font-size: clamp(26px, 3.4vw, 31px);
     font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    text-wrap: balance;
+    margin-top: -4px;
   }
 
-  .today-tea__intro {
-    font-size: 14px;
-    line-height: 1.6;
+  .tea__message {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  .tea__specs {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding-top: 17px;
+    border-top: 1px solid var(--tea-rule);
+  }
+
+  .tea__spec {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+
+  .tea__spec dt {
+    flex: 0 0 84px;
+    font-family: var(--font-label);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--sage-label);
+  }
+
+  .tea__spec-value {
+    margin: 0;
+    font-size: 14.5px;
+    font-weight: 600;
     color: var(--text);
   }
 
-  .today-tea__line {
-    font-size: 14px;
-    line-height: 1.7;
-    color: var(--text-muted);
+  .tea__spec-value--num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tea__moment {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-top: 17px;
+    border-top: 1px solid var(--tea-rule);
+  }
+
+  .tea__moment-label {
+    font-family: var(--font-label);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--sage-label);
+  }
+
+  .tea__moment-text {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--accent-text);
+    text-wrap: pretty;
+  }
+
+  .tea ::selection {
+    background: color-mix(in srgb, var(--sage) 34%, transparent);
+    color: var(--text);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tea,
+    .tea__label,
+    .tea__name,
+    .tea__message,
+    .tea__specs,
+    .tea__moment,
+    .tea__leaf {
+      animation: none;
+    }
   }
 </style>

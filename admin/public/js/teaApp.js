@@ -1,193 +1,216 @@
-// ---- 오늘의 차 등록 파이프라인 ----
-// src/lib/todayTea.ts의 CATEGORY_LABELS와 값을 맞춰둔 것 — 어드민(CommonJS)과
-// 프런트(Astro/TS) 사이엔 공유 import 경로가 없어 값만 중복해서 유지한다.
-const TEA_CATEGORY_LABELS = {
-  intro: '도입부 (계절/날씨 담은 여운 있는 한 줄)',
-  whyPicked: '왜 이 차를 골랐냐면',
-  goodPoints: '이 차, 이런 점이 좋아요',
-  howToBrew: '이렇게 마시면 더 좋아요',
-  snackPairing: '이 차엔 이런 다식이 잘 어울려요',
-  comfortMessage: '오늘의 위로',
-};
+// ---- 오늘의 차 등록 ----
+// 추천풀(admin/data/todayTeaPool.xlsx)에서 계절·상황으로 한 건을 가져와,
+// 메인 페이지에 나갈 모습 그대로 미리보기에 채운다. 미리보기의 각 문구는
+// contenteditable이라 그 자리에서 고칠 수 있고, 등록하면 고친 내용이
+// teas.yaml과 추천풀 엑셀 양쪽에 반영된다.
 
-const TEA_STAGE_LABEL = {
-  queued: '대기 중...',
-  drafting: 'AI가 후보 문구를 쓰는 중...',
-  ready: '후보 문구가 준비됐습니다. 검토 후 등록하세요.',
-  published: '등록 완료!',
-  error: '오류가 발생했습니다.',
-};
-
-const teaForm = document.getElementById('tea-form');
-const teaGenerateBtn = document.getElementById('tea-generate-btn');
-const teaProgressBox = document.getElementById('tea-progress');
-const teaProgressText = document.getElementById('tea-progress-text');
-const teaEditorBox = document.getElementById('tea-editor');
-const teaCandidatesBox = document.getElementById('tea-candidates');
-const teaSlugInput = document.getElementById('tea-slug');
+const teaSeasonsBox = document.getElementById('tea-seasons');
+const teaSituationsBox = document.getElementById('tea-situations');
+const teaMoodText = document.getElementById('tea-mood');
+const teaPickBtn = document.getElementById('tea-pick-btn');
+const teaPickError = document.getElementById('tea-pick-error');
+const teaPreviewWrap = document.getElementById('tea-preview-wrap');
+const teaCardDate = document.getElementById('tea-card-date');
+const teaSourceText = document.getElementById('tea-source');
 const teaPublishBtn = document.getElementById('tea-publish-btn');
+const teaRepickBtn = document.getElementById('tea-repick-btn');
 const teaPublishResult = document.getElementById('tea-publish-result');
 
-let currentTeaPostId = null;
-let teaPollTimer = null;
+const TEA_FIELDS = ['name', 'message', 'brewingTip', 'pairing', 'moment'];
+const teaFieldEl = Object.fromEntries(TEA_FIELDS.map((f) => [f, document.getElementById(`tea-f-${f}`)]));
 
-function checkedValues(name) {
-  return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map((el) => el.value);
+let seasonTree = [];
+let selectedSeason = null;
+let selectedSituation = null;
+let currentCandidate = null;
+// 같은 후보가 연달아 나오지 않게 이번 세션에서 본 것들을 기억해둔다.
+const seenNos = [];
+
+const WEEKDAYS_KO = ['일', '월', '화', '수', '목', '금', '토'];
+
+function formatDisplayDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const weekday = WEEKDAYS_KO[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
+  return `${m}월 ${d}일 ${weekday}요일`;
 }
 
-function slugify(text) {
-  return text
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9가-힣]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+function makeChip(label, onClick) {
+  const chip = document.createElement('button');
+  chip.type = 'button';
+  chip.className = 'chip';
+  chip.textContent = label;
+  chip.addEventListener('click', onClick);
+  return chip;
 }
 
-teaForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
+function renderSeasons() {
+  teaSeasonsBox.innerHTML = '';
+  for (const group of seasonTree) {
+    const chip = makeChip(group.season, () => selectSeason(group.season));
+    chip.setAttribute('aria-pressed', String(group.season === selectedSeason));
+    teaSeasonsBox.appendChild(chip);
+  }
+}
 
-  const name = document.getElementById('tea-name').value.trim();
-  const category = document.getElementById('tea-category').value.trim();
-  const seasons = checkedValues('tea-season');
-  const weatherTags = checkedValues('tea-weather');
-  const selectedCategories = checkedValues('tea-cat');
+function renderSituations() {
+  teaSituationsBox.innerHTML = '';
+  const group = seasonTree.find((g) => g.season === selectedSeason);
+  if (!group) return;
 
-  if (!name || selectedCategories.length === 0) {
-    alert('이름과 문구를 생성할 항목을 최소 1개 선택해주세요.');
+  const all = makeChip('상황 무관', () => selectSituation(null));
+  all.setAttribute('aria-pressed', String(selectedSituation === null));
+  teaSituationsBox.appendChild(all);
+
+  for (const item of group.situations) {
+    const chip = makeChip(item.situation, () => selectSituation(item.situation));
+    chip.setAttribute('aria-pressed', String(item.situation === selectedSituation));
+    chip.title = `${item.mood} · ${item.count}건`;
+    teaSituationsBox.appendChild(chip);
+  }
+}
+
+function renderMood() {
+  const group = seasonTree.find((g) => g.season === selectedSeason);
+  const item = group?.situations.find((s) => s.situation === selectedSituation);
+  if (!item) {
+    teaMoodText.hidden = true;
+    return;
+  }
+  teaMoodText.textContent = `${item.mood} — "${item.moment}" (${item.count}건)`;
+  teaMoodText.hidden = false;
+}
+
+function selectSeason(season) {
+  selectedSeason = season;
+  selectedSituation = null;
+  renderSeasons();
+  renderSituations();
+  renderMood();
+}
+
+function selectSituation(situation) {
+  selectedSituation = situation;
+  renderSituations();
+  renderMood();
+}
+
+function showPickError(message) {
+  teaPickError.textContent = message;
+  teaPickError.hidden = false;
+}
+
+function fillPreview(candidate, today) {
+  currentCandidate = candidate;
+  for (const field of TEA_FIELDS) {
+    teaFieldEl[field].textContent = candidate[field] || '';
+  }
+  teaCardDate.textContent = formatDisplayDate(today);
+  teaSourceText.textContent = `추천풀 No.${candidate.no} · ${candidate.situation}`;
+  teaPreviewWrap.hidden = false;
+  teaPublishResult.textContent = '';
+}
+
+async function pickCandidate() {
+  teaPickError.hidden = true;
+  teaPickBtn.disabled = true;
+  teaRepickBtn.disabled = true;
+
+  const params = new URLSearchParams();
+  if (selectedSeason) params.set('season', selectedSeason);
+  if (selectedSituation) params.set('situation', selectedSituation);
+  if (seenNos.length) params.set('exclude', seenNos.join(','));
+
+  try {
+    const res = await fetch(`/api/teas/pool/pick?${params}`);
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || '후보를 가져오지 못했습니다.');
+
+    seenNos.push(json.candidate.no);
+    if (seenNos.length > 40) seenNos.shift();
+    fillPreview(json.candidate, json.today);
+  } catch (err) {
+    showPickError(err.message);
+  } finally {
+    teaPickBtn.disabled = false;
+    teaRepickBtn.disabled = false;
+  }
+}
+
+teaPickBtn.addEventListener('click', pickCandidate);
+teaRepickBtn.addEventListener('click', pickCandidate);
+
+teaPublishBtn.addEventListener('click', async () => {
+  if (!currentCandidate) return;
+
+  const edited = {};
+  for (const field of TEA_FIELDS) {
+    edited[field] = teaFieldEl[field].textContent.trim();
+  }
+
+  const empty = TEA_FIELDS.filter((f) => !edited[f]).map((f) => teaFieldEl[f].dataset.label);
+  if (empty.length) {
+    teaPublishResult.textContent = `${empty.join(', ')} 항목이 비어 있습니다.`;
+    teaPublishResult.className = 'result result--error';
     return;
   }
 
-  teaGenerateBtn.disabled = true;
-  teaProgressBox.hidden = false;
-  teaEditorBox.hidden = true;
-  teaProgressText.textContent = '요청 중...';
+  teaPublishBtn.disabled = true;
+  teaRepickBtn.disabled = true;
+  teaPublishResult.className = 'result';
+  teaPublishResult.textContent = '등록 중...';
 
   try {
-    const res = await fetch('/api/teas/generate', {
+    const res = await fetch('/api/teas/publish', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, category, seasons, weatherTags, selectedCategories }),
+      body: JSON.stringify({
+        no: currentCandidate.no,
+        season: currentCandidate.season,
+        situation: currentCandidate.situation,
+        mood: currentCandidate.mood,
+        ...edited,
+      }),
     });
     const json = await res.json();
-    if (!json.ok) throw new Error(json.error || '생성 요청 실패');
-    currentTeaPostId = json.postId;
-    pollTeaStatus();
-  } catch (err) {
-    teaProgressText.textContent = `실패: ${err.message}`;
-    teaGenerateBtn.disabled = false;
-  }
-});
 
-function pollTeaStatus() {
-  clearInterval(teaPollTimer);
-  teaPollTimer = setInterval(async () => {
-    const res = await fetch(`/api/teas/${currentTeaPostId}/status`);
-    const status = await res.json();
-    teaProgressText.textContent = `${TEA_STAGE_LABEL[status.stage] || status.stage} (${status.progress || 0}%)`;
-
-    if (status.stage === 'ready') {
-      clearInterval(teaPollTimer);
-      teaGenerateBtn.disabled = false;
-      await loadTeaEditor();
-    } else if (status.stage === 'error') {
-      clearInterval(teaPollTimer);
-      teaGenerateBtn.disabled = false;
-      teaProgressText.textContent = `오류: ${status.error}`;
-    }
-  }, 2000);
-}
-
-async function loadTeaEditor() {
-  const res = await fetch(`/api/teas/${currentTeaPostId}`);
-  const content = await res.json();
-
-  teaCandidatesBox.innerHTML = '';
-  const candidates = content.candidates || {};
-  for (const [key, lines] of Object.entries(candidates)) {
-    const fieldset = document.createElement('fieldset');
-    fieldset.className = 'field';
-    fieldset.dataset.category = key;
-
-    const legend = document.createElement('legend');
-    legend.textContent = TEA_CATEGORY_LABELS[key] || key;
-    fieldset.appendChild(legend);
-
-    lines.forEach((line, i) => {
-      const row = document.createElement('label');
-      row.style.display = 'flex';
-      row.style.gap = '8px';
-      row.style.alignItems = 'center';
-
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.checked = i === 0; // 기본으로 첫 번째 후보만 체크
-      checkbox.className = 'tea-candidate-checkbox';
-
-      const text = document.createElement('input');
-      text.type = 'text';
-      text.value = line;
-      text.className = 'tea-candidate-text';
-      text.style.flex = '1';
-
-      row.appendChild(checkbox);
-      row.appendChild(text);
-      fieldset.appendChild(row);
-    });
-
-    teaCandidatesBox.appendChild(fieldset);
-  }
-
-  teaSlugInput.value = content.slug || slugify(content.name || '');
-  teaEditorBox.hidden = false;
-}
-
-teaPublishBtn.addEventListener('click', async () => {
-  teaPublishBtn.disabled = true;
-  teaPublishResult.textContent = '저장 중...';
-
-  const finalLines = {};
-  teaCandidatesBox.querySelectorAll('fieldset[data-category]').forEach((fieldset) => {
-    const key = fieldset.dataset.category;
-    const lines = [];
-    fieldset.querySelectorAll('label').forEach((row) => {
-      const checkbox = row.querySelector('.tea-candidate-checkbox');
-      const text = row.querySelector('.tea-candidate-text');
-      if (checkbox.checked && text.value.trim()) lines.push(text.value.trim());
-    });
-    finalLines[key] = lines;
-  });
-
-  const patch = { ...finalLines, slug: teaSlugInput.value.trim() };
-
-  try {
-    await fetch(`/api/teas/${currentTeaPostId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(patch),
-    });
-
-    teaPublishResult.textContent = '등록 중...';
-    const res = await fetch(`/api/teas/${currentTeaPostId}/publish`, { method: 'POST' });
-    const json = await res.json();
-    if (json.ok) {
-      teaPublishResult.textContent = `등록 완료: ${json.slug} (1~2분 후 사이트에 반영됩니다)`;
-    } else {
+    if (!json.ok) {
+      teaPublishResult.className = 'result result--error';
       teaPublishResult.textContent = `실패: ${json.error}`;
+      return;
     }
+
+    teaPublishResult.className = 'result result--ok';
+    teaPublishResult.textContent = json.poolUpdated
+      ? `${json.date} 오늘의 차로 등록했습니다. 1~2분 후 사이트에 반영됩니다.`
+      : `${json.date} 오늘의 차로 등록했습니다. 다만 추천풀 엑셀 저장은 실패했습니다 — ${json.poolError}`;
   } catch (err) {
+    teaPublishResult.className = 'result result--error';
     teaPublishResult.textContent = `실패: ${err.message}`;
   } finally {
     teaPublishBtn.disabled = false;
+    teaRepickBtn.disabled = false;
   }
 });
 
-// ---- 페이지를 새로 열어도 대기 중인 초안을 이어서 편집할 수 있게 자동으로 불러오기 ----
+// ---- 초기 로드: 계절·상황 목록을 추천풀에서 읽어온다 ----
 
 (async () => {
-  const res = await fetch('/api/teas/pending');
-  const { postId } = await res.json();
-  if (postId) {
-    currentTeaPostId = postId;
-    await loadTeaEditor();
+  try {
+    const res = await fetch('/api/teas/pool/situations');
+    const json = await res.json();
+    if (json.ok === false) throw new Error(json.error);
+
+    seasonTree = json.seasons || [];
+    if (seasonTree.length === 0) {
+      showPickError('추천풀이 비어 있습니다.');
+      return;
+    }
+    // 오늘 계절이 추천풀에 있으면 그걸 기본 선택 — 가장 흔한 사용 흐름을 한 번에 줄여준다.
+    const month = new Date().getMonth() + 1;
+    const todaySeason =
+      month >= 3 && month <= 5 ? '봄' : month >= 6 && month <= 8 ? '여름' : month >= 9 && month <= 11 ? '가을' : '겨울';
+    selectSeason(seasonTree.some((g) => g.season === todaySeason) ? todaySeason : seasonTree[0].season);
+  } catch (err) {
+    showPickError(`추천풀을 읽지 못했습니다: ${err.message}`);
   }
 })();
