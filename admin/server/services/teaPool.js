@@ -14,7 +14,7 @@ const { DATA_DIR } = require('../paths');
 const { refineMessage } = require('./koreanText');
 
 const POOL_FILE = path.join(DATA_DIR, 'todayTeaPool.xlsx');
-const SHEET_NAME = '오늘의 차 500';
+const SHEET_NAME = '오늘의 차 추천풀';
 
 const COL = { no: 1, situation: 2, mood: 3, name: 4, message: 5, brewingTip: 6, pairing: 7, moment: 8 };
 
@@ -26,10 +26,22 @@ const SEASON_RULES = [
   [/겨울|눈|한파/, '겨울'],
 ];
 
+// "11월의 비"처럼 계절 단어 없이 달로만 시기를 말하는 상황이 있다.
+const MONTH_SEASONS = {
+  3: '봄', 4: '봄', 5: '봄',
+  6: '여름', 7: '여름', 8: '여름',
+  9: '가을', 10: '가을', 11: '가을',
+  12: '겨울', 1: '겨울', 2: '겨울',
+};
+
 function seasonOf(situation) {
+  // 계절·날씨 단어가 달 표기보다 우선 — "9월 초가을"은 어느 쪽이든 가을이지만,
+  // 앞으로 "3월의 눈" 같은 상황이 들어오면 분위기를 나타내는 단어를 따르는 게 맞다.
   for (const [pattern, season] of SEASON_RULES) {
     if (pattern.test(situation)) return season;
   }
+  const month = situation.match(/(\d{1,2})월/);
+  if (month) return MONTH_SEASONS[Number(month[1])] || '전체';
   return '전체';
 }
 

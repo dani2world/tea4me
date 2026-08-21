@@ -50,13 +50,18 @@ function escapeRegExp(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// 추천풀 문장이 값을 끼워 넣지 않고 그냥 쓰는 말인데도 조사가 틀린 것들.
+// 전수 스캔으로 찾았다 ("진한 풍미이", "풍미을 느껴보세요" 등 1000행 중 111건).
+// 새 추천풀을 병합할 때 스캔을 다시 돌려 여기에 추가한다.
+const KNOWN_NOUNS = ['풍미'];
+
 /**
  * 문장에 끼워 넣어진 값들 뒤의 조사를 바로잡는다.
  * 차 이름·다식뿐 아니라 분위기 구절도 대상 — "해가 길어진 저녁와" 같은 오류가 있다.
  */
 function fixParticles(text, { teaName, pairing, mood }) {
   let out = text;
-  for (const word of [teaName, pairing, mood]) {
+  for (const word of [teaName, pairing, mood, ...KNOWN_NOUNS]) {
     if (word) out = fixParticlesAfter(out, word);
   }
   return out;
@@ -144,6 +149,17 @@ function dropTeaNameLead(message, teaName) {
 }
 
 /**
+ * 문장 한가운데서 이름을 부르고 쉼표로 잇는 형태를 덜어낸다.
+ * 예: "…차도 조금 다르게 골라보세요. 오늘은 겐마이차, 구수한 현미 향이…"
+ *  →  "…차도 조금 다르게 골라보세요. 구수한 현미 향이…"
+ * 도입부 문장(dropTeaNameLead)과 달리 앞 문장에 분위기가 담겨 있어 그대로 살린다.
+ */
+function dropTeaNameAside(message, teaName) {
+  if (!teaName || !message.includes(teaName)) return message;
+  return message.replace(new RegExp(`오늘은\\s*${escapeRegExp(teaName)}\\s*,\\s*`, 'g'), '');
+}
+
+/**
  * 카드에 바로 쓸 수 있는 한마디 초안을 만든다.
  * 원문은 버리지 않고 함께 돌려주어, 어드민에서 되돌릴 수 있게 한다.
  */
@@ -151,7 +167,8 @@ function refineMessage(message, { teaName, brewingTip, pairing, mood }) {
   const raw = (message || '').trim();
   if (!raw) return { message: '', rawMessage: '' };
 
-  const short = dropTeaNameLead(trimBrewingTail(raw, { brewingTip, pairing }), teaName);
+  const trimmed = trimBrewingTail(raw, { brewingTip, pairing });
+  const short = dropTeaNameAside(dropTeaNameLead(trimmed, teaName), teaName);
   return {
     message: fixParticles(short, { teaName, pairing, mood }),
     rawMessage: fixParticles(raw, { teaName, pairing, mood }),

@@ -3,6 +3,72 @@
 # 골라 등록하면 여기에 쌓인다. 등록한 날짜(date)에 고정 노출되고, 등록을 건너뛴 날은
 # 같은 계절의 과거 등록분에서 자동으로 하나가 뽑힌다 — src/lib/todayTea.ts 참고.
 
+- slug: tea-2025-09-20
+  name: 차이 티
+  date: "2025-09-20"
+  season: 가을
+  situation: 초가을 저녁
+  mood: 해가 조금씩 짧아진 저녁
+  message: 홍차의 깊이와 따뜻한 향신료 풍미이 계절의 공기와 자연스럽게 어울려요.
+  brewingTip: 95℃ · 4~5분
+  pairing: 시나몬 쿠키
+  moment: 하루를 차분하게 접고 싶은 저녁
+  sourceNo: 558
+- slug: tea-2025-10-25
+  name: 동방미인
+  date: "2025-10-25"
+  season: 가을
+  situation: 단풍이 깊어진 날
+  mood: 거리와 산이 붉고 노랗게 물든 날
+  message: 잘 익은 과일 같은 향과 부드러운 단맛이 마음에 작은 여백을 만들어줘요.
+  brewingTip: 90~95℃ · 2~3분
+  pairing: 과편
+  moment: 따뜻하고 깊은 차를 오래 음미하고 싶은 날
+  sourceNo: 749
+- slug: tea-2025-11-15
+  name: 백모단
+  date: "2025-11-15"
+  season: 가을
+  situation: 11월의 비
+  mood: 차가운 비가 내리는 11월
+  message: 부드러운 꽃향과 은근한 단맛이 천천히 올라와요.
+  brewingTip: 85℃ 안팎 · 3분
+  pairing: 과편
+  moment: 따뜻한 향으로 하루의 빈틈을 채우고 싶은 날
+  sourceNo: 807
+- slug: tea-2025-12-18
+  name: 실론 홍차
+  date: "2025-12-18"
+  season: 겨울
+  situation: 초겨울 저녁
+  mood: 어둠이 일찍 내려오는 저녁
+  message: 깨끗한 향과 또렷한 산뜻함이 불빛과 차 한 잔의 포근함을 즐기고 싶은 마음에 잔잔하게 머물 수 있좋아요.
+  brewingTip: 90~95℃ · 3분
+  pairing: 레몬케이크
+  moment: 불빛과 차 한 잔의 포근함을 즐기고 싶은 저녁
+  sourceNo: 874
+- slug: tea-2026-01-20
+  name: 밀크티 블렌드
+  date: "2026-01-20"
+  season: 겨울
+  situation: 한겨울 아침
+  mood: 찬 공기가 매섭게 느껴지는 아침
+  message: 우유와 잘 어울리는 진하고 힘 있는 홍차 풍미이 진하고 따뜻한 한 잔으로 나를 깨우고 싶은 마음에 잘 어울려요.
+  brewingTip: 95℃ · 3~4분 후 우유
+  pairing: 버터스콘
+  moment: 진하고 따뜻한 한 잔으로 나를 깨우고 싶은 아침
+  sourceNo: 957
+- slug: tea-2026-02-10
+  name: 루이보스
+  date: "2026-02-10"
+  season: 겨울
+  situation: 한겨울 밤
+  mood: 하루 종일 추웠던 날의 늦은 밤
+  message: 구수하고 부드러운 단맛이 은은하게 퍼지좋아요.
+  brewingTip: 95℃ · 5분
+  pairing: 견과류 쿠키
+  moment: 아무것도 서두르지 않고 포근하게 쉬고 싶은 밤
+  sourceNo: 1000
 - slug: tea-2026-04-10
   name: 말차
   date: "2026-04-10"
