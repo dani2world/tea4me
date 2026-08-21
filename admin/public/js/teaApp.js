@@ -179,10 +179,18 @@ teaPublishBtn.addEventListener('click', async () => {
       return;
     }
 
-    teaPublishResult.className = 'result result--ok';
-    teaPublishResult.textContent = json.poolUpdated
-      ? `${json.date} 오늘의 차로 등록했습니다. 1~2분 후 사이트에 반영됩니다.`
-      : `${json.date} 오늘의 차로 등록했습니다. 다만 추천풀 엑셀 저장은 실패했습니다 — ${json.poolError}`;
+    const notes = [`${json.date} 오늘의 차로 등록했습니다. 1~2분 후 사이트에 반영됩니다.`];
+    if (!json.poolUpdated) notes.push(`다만 추천풀 엑셀 저장은 실패했습니다 — ${json.poolError}`);
+    if (json.includedSources?.length) {
+      notes.push(`수정된 소스도 함께 올렸습니다: ${json.includedSources.join(', ')}`);
+    }
+    // 함께 싣지 않은 src/ 변경이 남아 있으면 빌드가 깨질 수 있으니 눈에 띄게 알린다.
+    if (json.otherDirtySources?.length) {
+      notes.push(`⚠ 아직 커밋되지 않은 소스가 있습니다 — ${json.otherDirtySources.join(', ')}. 이 파일들 때문에 배포가 실패할 수 있습니다.`);
+    }
+
+    teaPublishResult.className = json.otherDirtySources?.length ? 'result result--warn' : 'result result--ok';
+    teaPublishResult.textContent = notes.join('\n');
   } catch (err) {
     teaPublishResult.className = 'result result--error';
     teaPublishResult.textContent = `실패: ${err.message}`;

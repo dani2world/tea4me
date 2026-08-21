@@ -101,8 +101,14 @@ router.post('/publish', async (req, res) => {
       }
     }
 
-    await publish({ postDir: CONTENT_TEAS_FILE, message: `오늘의 차 등록: ${entry.name} (${date})` });
-    res.json({ ok: true, slug: entry.slug, date, poolUpdated, poolError });
+    // 카드가 빌드되는 데 필요한 소스 — 수정돼 있으면 데이터와 같은 커밋에 함께 실린다.
+    const pushed = await publish({
+      postDir: CONTENT_TEAS_FILE,
+      message: `오늘의 차 등록: ${entry.name} (${date})`,
+      alsoInclude: ['src/lib/todayTea.ts', 'src/components/TodayTea.astro'],
+    });
+
+    res.json({ ok: true, slug: entry.slug, date, poolUpdated, poolError, ...pushed });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }
