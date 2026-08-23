@@ -11,11 +11,25 @@ const posts = defineCollection({
         pubDate: z.coerce.date(),
         updatedDate: z.coerce.date().optional(),
 
-        // 정보성(자동생성) | 경험/리뷰(수동)
-        type: z.enum(['info', 'experience']),
+        // 정보성(자동생성) | 리뷰(직접 마셔본 기록) | 차후감(차를 마신 뒤 남은 생각, 아직 미운영)
+        type: z.enum(['info', 'review', 'reflection']),
+        // 제목 안 의미 단위 줄바꿈(<br>)과 강조(<em>)를 넣은 버전. 없으면 title을 그대로 렌더.
+        titleBreak: z.string().optional(),
         category: z.string().min(1),
         tags: z.array(z.string()).default([]),
         excerpt: z.string().min(1).max(200),
+        // 홈 Latest 자리에 노출할 글. 아무 글도 true가 아니면 최신 글로 자동 대체된다.
+        featured: z.boolean().default(false),
+        // 본문 안 "이렇게 우려보세요" 브루잉 박스. 없으면 그 글은 박스를 렌더하지 않는다.
+        brewing: z
+          .object({
+            tea: z.string().min(1),
+            note: z.string().min(1),
+            temp: z.string().min(1),
+            time: z.string().min(1),
+            leaf: z.string().min(1),
+          })
+          .optional(),
 
         coverImage: image(),
         coverImageAlt: z.string().min(1),
@@ -34,7 +48,7 @@ const posts = defineCollection({
           })
           .optional(),
 
-        author: z.string().default('티소믈리에'),
+        author: z.string().default('DANI'),
         // 한마디 인용구 위에 보여줄 핵심 요약 박스 (2~4개 항목). 주로 정보성 글에 사용.
         keyTakeaways: z.array(z.string()).optional(),
         // 운영자가 직접 쓴 한 문장 — 정보성 글의 발행 게이트 근거
