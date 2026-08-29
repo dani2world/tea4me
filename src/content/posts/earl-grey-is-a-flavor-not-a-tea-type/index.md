@@ -1,7 +1,7 @@
 ---
 title: 얼그레이, 사실 홍차 종류가 아니라 향의 이름이었어요
 slug: earl-grey-is-a-flavor-not-a-tea-type
-pubDate: '2026-08-23'
+pubDate: '2026-08-29'
 type: info
 category: 서양·글로벌 티 문화
 tags:
@@ -20,7 +20,7 @@ coverImageFocalPoint:
   x: 0.51
   'y': 0.55
 author: 티소믈리에
-humanNote: 그레이 백작님 덕분에 즐거운 생활차가 탄생했네요
+humanNote: 그레이 백작님 덕분에 즐거운 생활차가 탄생했네요 :)
 keyTakeaways:
   - 얼그레이는 차 품종이 아니라 베르가못 향을 입힌 가향차의 이름이에요.
   - 베르가못은 이탈리아 칼라브리아산 감귤류 열매로, 껍질 오일에서 향이 나와요.
