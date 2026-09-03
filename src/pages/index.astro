@@ -159,17 +159,16 @@ const hasMore = posts.filter((p) => p.id !== featured?.id).length > recent.lengt
 
   .top-grid {
     display: grid;
-    grid-template-columns: 1.55fr 1fr;
+    grid-template-columns: 1.77fr 1fr;
     padding-top: 0;
   }
 
   .top-grid__latest {
     padding: 30px 32px 32px 0;
-    border-right: 1px solid var(--border-soft);
   }
 
   .top-grid__tea {
-    padding-left: 32px;
+    padding-left: 0;
   }
 
   .top-grid__tea :global(.tea) {
@@ -185,7 +184,6 @@ const hasMore = posts.filter((p) => p.id !== featured?.id).length > recent.lengt
 
     .top-grid__latest {
       padding: 24px 0;
-      border-right: none;
       border-top: 1px solid var(--border-soft);
     }
 
