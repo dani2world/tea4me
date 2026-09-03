@@ -13,7 +13,7 @@ coverImageAttribution:
   photographerUrl: "https://www.pexels.com"
   source: "pexels"
   sourceUrl: "https://www.pexels.com"
-author: "티소믈리에"
+author: "단희"
 keyTakeaways:
   - "떫은맛의 주범은 카테킨 — 70~80도로 식힌 물이면 억제된다"
   - "온도계 없이도 물을 그릇에 한 번 옮겨 담으면 충분히 식는다"

@@ -1,0 +1,41 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { POST_TYPE_LABEL, POST_TYPES } from '../../lib/postType';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', ({ data }) => !data.draft);
+
+  return POST_TYPES.map((type) => ({
+    params: { type },
+    props: {
+      posts: posts
+        .filter((p) => p.data.type === type)
+        .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
+    },
+  }));
+}
+
+const { type } = Astro.params as { type: 'info' | 'review' | 'reflection' };
+const { posts } = Astro.props;
+const label = POST_TYPE_LABEL[type];
+---
+
+<BaseLayout title={`${label} · TEA for ME`}>
+  <section class="container page-heading">
+    <p class="page-heading__label">Type</p>
+    <h1 class="page-heading__title">{label}</h1>
+  </section>
+  <section class="container">
+    {posts.length === 0 ? (
+      <p class="empty-state">아직 이 분류의 글이 없습니다.</p>
+    ) : (
+      <div class="post-grid" style="padding-bottom: 96px;">
+        {posts.map((post) => (
+          <PostCard post={post} />
+        ))}
+      </div>
+    )}
+  </section>
+</BaseLayout>

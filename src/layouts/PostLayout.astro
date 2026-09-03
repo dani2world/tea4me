@@ -2,106 +2,355 @@
 import { Image } from 'astro:assets';
 import BaseLayout from './BaseLayout.astro';
 import AttributionBadge from '../components/AttributionBadge.astro';
+import { POST_TYPE_LABEL } from '../lib/postType';
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
   post: CollectionEntry<'posts'>;
+  headings: { depth: number; slug: string; text: string }[];
+  prev: CollectionEntry<'posts'> | null;
+  next: CollectionEntry<'posts'> | null;
 }
 
-const { post } = Astro.props;
+const { post, headings, prev, next } = Astro.props;
 const { data } = post;
 const base = import.meta.env.BASE_URL;
-const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }).format(
-  data.pubDate,
-);
+const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })
+  .format(data.pubDate)
+  .replace(/\. /g, '.')
+  .replace(/\.$/, '');
+const toc = headings.filter((h) => h.depth === 2);
 ---
 
 <BaseLayout title={`${data.title} · TEA for ME`} description={data.excerpt}>
-  <article class="post container">
-    <div class="post__meta">
-      <span class={`tag ${data.type === 'experience' ? 'tag--experience' : 'tag--info'}`}>
-        {data.type === 'experience' ? '경험' : '정보'}
-      </span>
-      <a class="post__category" href={`${base}/category/${data.category}`}>{data.category}</a>
-      <span class="post__date">{dateLabel}</span>
-    </div>
-    <h1 class="post__title">{data.title}</h1>
-    <div class="post__cover">
-      <Image src={data.coverImage} alt={data.coverImageAlt} width={960} />
-      {data.coverImageAttribution && <AttributionBadge {...data.coverImageAttribution} />}
-    </div>
-    <div class="post__content">
-      <slot />
-    </div>
-    {data.keyTakeaways && data.keyTakeaways.length > 0 && (
-      <div class="post__summary">
-        <p class="post__summary-label">Summary</p>
-        <ul>
-          {data.keyTakeaways.map((point) => (
-            <li>{point}</li>
-          ))}
-        </ul>
+  <div class="progress" aria-hidden="true"><span class="progress__fill" data-progress-fill></span></div>
+
+  <article class="post">
+    <header class="post__head container">
+      {data.titleBreak ? (
+        <h1 class="post__title" set:html={data.titleBreak} />
+      ) : (
+        <h1 class="post__title">{data.title}</h1>
+      )}
+      <p class="post__meta">
+        <span class="post__author">{data.author}</span> · <span data-field="date">{dateLabel}</span>
+      </p>
+      <p class="post__excerpt" set:html={data.excerpt} />
+    </header>
+
+    <div class="post__cover-wrap container">
+      <div class="post__cover">
+        <Image src={data.coverImage} alt={data.coverImageAlt} width={820} />
+        {data.coverImageAttribution && <AttributionBadge {...data.coverImageAttribution} />}
       </div>
-    )}
-    {data.humanNote && <blockquote class="post__note">"{data.humanNote}"</blockquote>}
-    {data.tags.length > 0 && (
-      <ul class="post__tags">
-        {data.tags.map((tag) => (
-          <li><a href={`${base}/tags/${tag}`}>#{tag}</a></li>
-        ))}
-      </ul>
+    </div>
+
+    <div class="post__layout container">
+      <aside class="post__toc" data-toc-wrap>
+        <div class="post__toc-sticky">
+          {toc.length > 0 && (
+            <>
+              <p class="post__toc-label">CONTENTS</p>
+              <ul class="post__toc-list" data-toc-list>
+                {toc.map((h) => (
+                  <li><a href={`#${h.slug}`} data-toc-link={h.slug}>{h.text}</a></li>
+                ))}
+              </ul>
+            </>
+          )}
+          <div class="post__toc-actions">
+            <button type="button" class="post__toc-action" data-share-link>SHARE ⌁ LINK</button>
+            <a
+              class="post__toc-action"
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(data.title)}&url=${encodeURIComponent(Astro.url.href)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >SHARE ⌁ X</a>
+            <button type="button" class="post__toc-action" data-save-toggle data-post-id={post.id}>SAVE ♡</button>
+          </div>
+        </div>
+      </aside>
+
+      <div class="post__content" data-post-body>
+        <slot />
+
+        {data.brewing && (
+          <div class="brewing-box">
+            <p class="brewing-box__label">🌷 오늘 이 글의 차, 이렇게 우려보세요</p>
+            <p class="brewing-box__tea">{data.brewing.tea}</p>
+            <p class="brewing-box__note">{data.brewing.note}</p>
+            <dl class="brewing-box__specs">
+              <div><dt>TEMP</dt><dd>{data.brewing.temp}</dd></div>
+              <div><dt>TIME</dt><dd>{data.brewing.time}</dd></div>
+              <div><dt>LEAF</dt><dd>{data.brewing.leaf}</dd></div>
+            </dl>
+          </div>
+        )}
+
+        {data.keyTakeaways && data.keyTakeaways.length > 0 && (
+          <div class="post__summary">
+            <p class="post__summary-label">Summary</p>
+            <ul>
+              {data.keyTakeaways.map((point) => (
+                <li>{point}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {data.humanNote && <blockquote class="post__note">"{data.humanNote}"</blockquote>}
+
+        {data.tags.length > 0 && (
+          <ul class="post__tags">
+            {data.tags.map((tag) => (
+              <li><a href={`${base}/tags/${tag}`}>#{tag}</a></li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+
+    {(prev || next) && (
+      <nav class="post__pager container">
+        <a class="post__pager-link post__pager-link--prev" href={prev ? `${base}/posts/${prev.id}` : undefined} aria-disabled={!prev}>
+          {prev && (
+            <>
+              <span class="post__pager-label">← PREVIOUS</span>
+              <span class="post__pager-title">{prev.data.title}</span>
+            </>
+          )}
+        </a>
+        <a class="post__pager-link post__pager-link--next" href={next ? `${base}/posts/${next.id}` : undefined} aria-disabled={!next}>
+          {next && (
+            <>
+              <span class="post__pager-label">NEXT →</span>
+              <span class="post__pager-title">{next.data.title}</span>
+            </>
+          )}
+        </a>
+      </nav>
     )}
   </article>
 </BaseLayout>
 
+<script>
+  const fill = document.querySelector<HTMLElement>('[data-progress-fill]');
+  const updateProgress = () => {
+    if (!fill) return;
+    const doc = document.documentElement;
+    const scrollable = doc.scrollHeight - doc.clientHeight;
+    const ratio = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
+    fill.style.width = `${ratio * 100}%`;
+  };
+  document.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+
+  // 목차 하이라이트 — 현재 뷰포트에 보이는 H2에 해당하는 항목을 코럴로.
+  const body = document.querySelector<HTMLElement>('[data-post-body]');
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
+  if (body && links.length > 0) {
+    const headings = Array.from(body.querySelectorAll<HTMLElement>('h2[id]'));
+    const setActive = (id: string | null) => {
+      links.forEach((l) => l.classList.toggle('is-active', l.dataset.tocLink === id));
+    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting);
+        if (visible.length > 0) setActive(visible[0].target.id);
+      },
+      { rootMargin: '-10% 0px -70% 0px' },
+    );
+    headings.forEach((h) => observer.observe(h));
+  }
+
+  // 링크 공유 — 클립보드 복사, 지원 안 하면 조용히 무시.
+  document.querySelector('[data-share-link]')?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+    } catch {
+      // 클립보드 API 미지원 브라우저 — 조용히 무시.
+    }
+  });
+
+  // 저장(북마크) — 로컬에만 남는 가벼운 토글.
+  const saveBtn = document.querySelector<HTMLButtonElement>('[data-save-toggle]');
+  if (saveBtn) {
+    const id = saveBtn.dataset.postId!;
+    const key = 'tea4me:saved-posts';
+    const read = (): string[] => {
+      try {
+        return JSON.parse(localStorage.getItem(key) ?? '[]');
+      } catch {
+        return [];
+      }
+    };
+    const render = () => saveBtn.classList.toggle('is-active', read().includes(id));
+    saveBtn.addEventListener('click', () => {
+      const saved = read();
+      const next = saved.includes(id) ? saved.filter((x) => x !== id) : [...saved, id];
+      localStorage.setItem(key, JSON.stringify(next));
+      render();
+    });
+    render();
+  }
+</script>
+
 <style>
-  .post {
-    max-width: 720px;
-    padding-top: 56px;
-    padding-bottom: 80px;
+  .progress {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    height: 3px;
+    background: var(--border-soft);
+  }
+
+  .progress__fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--coral);
+  }
+
+  .post__head {
+    max-width: 620px;
+    text-align: center;
+    padding: 44px 34px 30px;
+    margin: 0 auto;
   }
 
   .post__meta {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    color: var(--text-meta);
     margin-bottom: 18px;
   }
 
-  .post__category,
-  .post__date {
-    font-size: 13px;
-    color: var(--text-muted);
-  }
-
-  .post__category:hover {
-    color: var(--accent);
-  }
-
-  .post__tags a:hover {
-    color: var(--accent);
-  }
-
   .post__title {
-    font-size: clamp(28px, 4vw, 40px);
-    line-height: 1.3;
-    margin-bottom: 28px;
+    font-family: var(--font-kr);
+    font-weight: 600;
+    font-size: 42px;
+    line-height: 1.16;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+
+  .post__title :global(em) {
+    font-family: var(--font-en), var(--font-kr);
+    font-style: italic;
+    color: var(--coral);
+  }
+
+  .post__excerpt {
+    font-family: var(--font-kr);
+    font-weight: 300;
+    font-size: 15px;
+    line-height: 1.85;
+    color: var(--text-secondary);
+  }
+
+  .post__cover-wrap {
+    display: flex;
+    justify-content: center;
   }
 
   .post__cover {
-    margin-bottom: 40px;
+    max-width: 820px;
+    width: 100%;
+    margin-top: 30px;
   }
 
   .post__cover :global(img) {
     width: 100%;
-    height: auto;
-    border-radius: 12px;
+    height: 280px;
+    object-fit: cover;
+  }
+
+  .post__layout {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 40px;
+    padding-top: 40px;
+    align-items: start;
+  }
+
+  .post__toc {
+    align-self: stretch;
+  }
+
+  .post__toc-sticky {
+    position: sticky;
+    top: 24px;
+  }
+
+  .post__toc-label {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    color: var(--text-meta);
+    margin-bottom: 14px;
+  }
+
+  .post__toc-list {
+    list-style: none;
+    margin: 0 0 22px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .post__toc-list a {
+    display: block;
+    font-family: var(--font-ui);
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-meta);
+    border-left: 1px solid var(--border-soft);
+    padding-left: 10px;
+  }
+
+  .post__toc-list a.is-active {
+    color: var(--coral);
+    border-left: 2px solid var(--coral);
+    padding-left: 9px;
+  }
+
+  .post__toc-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .post__toc-action {
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 0;
+    font-family: var(--font-ui);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--text-meta);
+    cursor: pointer;
+  }
+
+  .post__toc-action:hover,
+  .post__toc-action.is-active {
+    color: var(--coral);
   }
 
   .post__content {
-    font-size: 17px;
-    line-height: 1.9;
-    letter-spacing: -0.003em;
+    max-width: 620px;
+    font-family: var(--font-kr);
+    font-weight: 300;
+    font-size: 15.5px;
+    line-height: 2.05;
+    color: var(--text-body);
   }
 
   .post__content :global(p) {
@@ -109,32 +358,36 @@ const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'lo
   }
 
   .post__content :global(h2) {
-    font-size: 22px;
-    margin: 2em 0 0.8em;
+    font-family: var(--font-en);
+    font-weight: 700;
+    font-size: 25px;
+    line-height: 1.35;
+    color: var(--text-body);
+    margin: 38px 0 0.8em;
   }
 
   .post__content :global(img) {
     width: 100%;
     height: auto;
-    border-radius: 12px;
     margin-top: 0.5em;
   }
 
   .post__content :global(em) {
     display: block;
     font-size: 13px;
-    color: var(--text-muted);
+    color: var(--text-meta);
     margin-top: -0.8em;
     margin-bottom: 1.4em;
+    font-style: normal;
   }
 
   .post__content :global(strong) {
-    font-weight: 700;
-    color: var(--accent);
+    font-weight: 600;
+    color: var(--coral);
   }
 
   .post__content :global(u) {
-    text-decoration-color: var(--accent);
+    text-decoration-color: var(--coral);
     text-decoration-thickness: 2px;
     text-underline-offset: 3px;
   }
@@ -149,32 +402,166 @@ const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'lo
     margin-bottom: 0.4em;
   }
 
+  .post__content :global(blockquote) {
+    margin: 1.8em 0;
+    padding-left: 20px;
+    border-left: 3px solid var(--coral);
+    font-weight: 300;
+    font-size: 18px;
+    line-height: 1.8;
+    color: var(--ink);
+  }
+
+  .post__content :global(blockquote p) {
+    margin-bottom: 0;
+  }
+
+  /* 대조 표 — 본문에 raw HTML로 붙여넣는 유틸 클래스. 루트 README에 예시 스니펫 문서화. */
+  .post__content :global(.compare-table) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--border-strong);
+    background: var(--table-bg);
+    margin: 1.8em 0;
+    font-family: var(--font-ui);
+  }
+
+  .post__content :global(.compare-table > div) {
+    padding: 16px 18px;
+    border-left: 1px solid var(--border-soft);
+  }
+
+  .post__content :global(.compare-table > div:first-child) {
+    border-left: none;
+  }
+
+  .post__content :global(.compare-table__label) {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    color: var(--coral);
+    margin-bottom: 6px;
+  }
+
+  .post__content :global(.compare-table__title) {
+    font-family: var(--font-en);
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .post__content :global(.compare-table__desc) {
+    font-family: var(--font-kr);
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--text-body);
+    margin-bottom: 10px;
+  }
+
+  .post__content :global(.compare-table__summary) {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border-soft);
+    padding-top: 10px;
+  }
+
+  @media (max-width: 720px) {
+    .post__content :global(.compare-table) {
+      grid-template-columns: 1fr;
+    }
+
+    .post__content :global(.compare-table > div) {
+      border-left: none;
+      border-top: 1px solid var(--border-soft);
+    }
+
+    .post__content :global(.compare-table > div:first-child) {
+      border-top: none;
+    }
+  }
+
+  .brewing-box {
+    margin: 2.5em 0;
+    background: var(--coral-pale);
+    border: 1px solid var(--coral-pale-border);
+    padding: 22px 24px;
+  }
+
+  .brewing-box__label {
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--coral);
+    margin-bottom: 14px;
+  }
+
+  .brewing-box__tea {
+    font-family: var(--font-kr);
+    font-weight: 400;
+    font-size: 25px;
+    margin-bottom: 6px;
+  }
+
+  .brewing-box__note {
+    font-family: var(--font-kr);
+    font-weight: 300;
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+  }
+
+  .brewing-box__specs {
+    display: flex;
+    gap: 26px;
+    margin: 0;
+  }
+
+  .brewing-box__specs dt {
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #a98a8d;
+    margin-bottom: 4px;
+  }
+
+  .brewing-box__specs dd {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
   .post__summary {
-    margin: 2.5em 0 3em;
-    padding: 18px 22px;
-    background: var(--tag-info-bg);
-    border-radius: 12px;
+    margin: 2.5em 0;
+    background: var(--table-bg);
+    border: 1px solid var(--border-strong);
+    padding: 20px 24px;
   }
 
   .post__summary-label {
-    font-family: var(--font-label);
-    font-size: 12px;
+    font-family: var(--font-ui);
+    font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--tag-info-text);
-    margin-bottom: 10px;
+    color: var(--coral);
+    margin-bottom: 12px;
   }
 
   .post__summary ul {
     margin: 0;
     padding-left: 20px;
-    color: var(--text);
+    color: var(--text-body);
   }
 
   .post__summary li {
+    font-family: var(--font-kr);
+    font-weight: 300;
     font-size: 15px;
-    line-height: 1.7;
+    line-height: 1.8;
   }
 
   .post__summary li + li {
@@ -182,13 +569,15 @@ const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'lo
   }
 
   .post__note {
-    margin: 3em 0 2.5em;
+    margin: 2.5em 0;
     padding-left: 20px;
-    border-left: 3px solid var(--accent);
+    border-left: 3px solid var(--coral);
+    font-family: var(--font-kr);
+    font-weight: 300;
     font-style: italic;
     font-size: 20px;
-    color: var(--accent);
-    white-space: pre-line;
+    line-height: 1.7;
+    color: var(--ink);
   }
 
   .post__tags {
@@ -198,7 +587,95 @@ const dateLabel = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'lo
     list-style: none;
     padding: 0;
     margin-top: 48px;
-    font-size: 13px;
-    color: var(--text-muted);
+  }
+
+  .post__tags a {
+    display: inline-block;
+    border: 1px solid #d8d4cd;
+    padding: 6px 12px;
+    font-family: var(--font-ui);
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .post__tags a:hover {
+    border-color: var(--coral);
+    color: var(--coral);
+  }
+
+  .post__pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-soft);
+    padding-bottom: 80px;
+  }
+
+  .post__pager-link {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .post__pager-link--next {
+    text-align: right;
+    align-items: flex-end;
+  }
+
+  .post__pager-label {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--text-meta);
+  }
+
+  .post__pager-link--next .post__pager-label {
+    color: var(--coral);
+  }
+
+  .post__pager-title {
+    font-family: var(--font-kr);
+    font-weight: 400;
+    font-size: 19px;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 900px) {
+    .post__layout {
+      grid-template-columns: 1fr;
+    }
+
+    .post__toc {
+      order: 2;
+    }
+
+    .post__toc-sticky {
+      position: static;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .post__title {
+      font-size: 27px;
+      line-height: 1.2;
+    }
+
+    .post__content {
+      font-size: 14px;
+      line-height: 2;
+    }
+
+    .post__pager {
+      grid-template-columns: 1fr;
+    }
+
+    .post__pager-link--next {
+      text-align: left;
+      align-items: flex-start;
+    }
   }
 </style>

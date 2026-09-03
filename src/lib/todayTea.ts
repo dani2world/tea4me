@@ -27,6 +27,7 @@ export function getKSTDateString(date: Date = new Date()): string {
 }
 
 const WEEKDAYS_KO = ['일', '월', '화', '수', '목', '금', '토'];
+const WEEKDAYS_EN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
 /** 'YYYY-MM-DD' -> '8월 21일 금요일'. dateStr을 UTC 자정으로 해석해 요일을 계산하므로
  * (순수 달력 날짜 연산) 실행 환경의 로컬 타임존과 무관하게 항상 같은 요일이 나온다. */
@@ -34,6 +35,13 @@ export function formatDisplayDate(dateStr: string): string {
   const [y, m, d] = dateStr.split('-').map(Number);
   const weekday = WEEKDAYS_KO[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
   return `${m}월 ${d}일 ${weekday}요일`;
+}
+
+/** 'YYYY-MM-DD' -> '2026.08.21 FRI' — 오늘의 차 카드의 JetBrains Mono 메타 표기용. */
+export function formatMonoDate(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const weekday = WEEKDAYS_EN[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
+  return `${dateStr.replace(/-/g, '.')} ${weekday}`;
 }
 
 export function getSeasonKST(dateStr: string): '봄' | '여름' | '가을' | '겨울' {

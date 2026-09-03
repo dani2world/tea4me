@@ -1,0 +1,340 @@
+---
+// Formspree 무료 폼 엔드포인트. 계정 만든 뒤 아래 값만 실제 endpoint로 바꾸면 됩니다.
+// 설정 방법은 프로젝트 루트 README.md "문의 폼 연결하기" 참고.
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+---
+
+<dialog id="contact-modal" class="modal">
+  <div class="modal__glow" aria-hidden="true"></div>
+
+  <div class="modal__panel modal__panel--form" data-panel="form">
+    <div class="modal__head">
+      <div>
+        <p class="modal__label">문의 · 응원글 남기기</p>
+        <p class="modal__hint">답장이 필요하면 메일주소를 남겨주세요.<br />응원글만 남기셔도 좋습니다.</p>
+      </div>
+      <button type="button" class="modal__close" data-modal-close aria-label="닫기">✕</button>
+    </div>
+
+    <div class="modal__rule" aria-hidden="true"><span class="modal__rule-fill"></span></div>
+
+    <div class="modal__type-toggle" role="radiogroup" aria-label="유형 선택">
+      <button type="button" class="modal__type is-active" data-type-btn="inquiry" aria-pressed="true">문의</button>
+      <button type="button" class="modal__type" data-type-btn="cheer" aria-pressed="false">응원글</button>
+    </div>
+
+    <form id="contact-form" data-contact-form>
+      <input type="hidden" name="_type" value="문의" data-type-field />
+
+      <label class="field">
+        <span class="field__label">닉네임 <em class="field__required">필수</em></span>
+        <input type="text" name="nickname" placeholder="어떻게 불러드릴까요?" required />
+      </label>
+
+      <label class="field">
+        <span class="field__label">
+          메일주소 <em class="field__required" data-email-required>필수</em><em class="field__optional" data-email-optional hidden>선택</em>
+        </span>
+        <input type="email" name="email" placeholder="your@email.com" data-email-input required />
+      </label>
+
+      <label class="field">
+        <span class="field__label">내용 <em class="field__required">필수</em></span>
+        <textarea name="message" placeholder="궁금한 점이나 하고 싶은 말을 자유롭게 적어주세요." required></textarea>
+      </label>
+
+      <button type="submit" class="modal__submit">보내기</button>
+      <p class="modal__note">남겨주신 메일주소는 답장에만 씁니다</p>
+    </form>
+  </div>
+
+  <div class="modal__panel modal__panel--done" data-panel="done" hidden>
+    <p class="modal__label">잘 받았어요</p>
+    <p class="modal__done-text">감사합니다.<br />차 한 잔 우려두고 답장 드릴게요 :)</p>
+    <div class="modal__rule modal__rule--short" aria-hidden="true"><span class="modal__rule-fill"></span></div>
+    <button type="button" class="btn btn--primary" data-modal-close>닫기</button>
+  </div>
+</dialog>
+
+<script define:vars={{ FORMSPREE_ENDPOINT }}>
+  const modal = document.getElementById('contact-modal');
+  const form = document.querySelector('[data-contact-form]');
+  const typeField = document.querySelector('[data-type-field]');
+  const emailInput = document.querySelector('[data-email-input]');
+  const emailRequired = document.querySelector('[data-email-required]');
+  const emailOptional = document.querySelector('[data-email-optional]');
+  const typeButtons = Array.from(document.querySelectorAll('[data-type-btn]'));
+  const formPanel = document.querySelector('[data-panel="form"]');
+  const donePanel = document.querySelector('[data-panel="done"]');
+
+  document.querySelectorAll('[data-open-contact]').forEach((btn) => {
+    btn.addEventListener('click', () => modal?.showModal());
+  });
+
+  document.querySelectorAll('[data-modal-close]').forEach((btn) => {
+    btn.addEventListener('click', () => modal?.close());
+  });
+
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) modal.close();
+  });
+
+  modal?.addEventListener('close', () => {
+    // 다시 열었을 때 항상 입력 화면부터 보이게.
+    formPanel.hidden = false;
+    donePanel.hidden = true;
+    form.reset();
+  });
+
+  typeButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const isCheer = btn.dataset.typeBtn === 'cheer';
+      typeButtons.forEach((b) => {
+        b.classList.toggle('is-active', b === btn);
+        b.setAttribute('aria-pressed', String(b === btn));
+      });
+      typeField.value = isCheer ? '응원글' : '문의';
+      emailInput.required = !isCheer;
+      emailInput.placeholder = isCheer ? '답장을 받고 싶으실 때만' : 'your@email.com';
+      emailRequired.hidden = isCheer;
+      emailOptional.hidden = !isCheer;
+    });
+  });
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = form.querySelector('.modal__submit');
+    submitBtn.disabled = true;
+    try {
+      await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' },
+      });
+    } catch {
+      // 오프라인 등으로 실패해도 사용자는 완료 화면을 보게 둔다 — Formspree가
+      // 아직 연결되지 않은 상태(placeholder endpoint)에서도 흐름을 확인할 수 있게.
+    }
+    submitBtn.disabled = false;
+    formPanel.hidden = true;
+    donePanel.hidden = false;
+  });
+</script>
+
+<style>
+  .modal {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    width: 480px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 48px);
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .modal::backdrop {
+    background: rgba(18, 17, 16, 0.6);
+  }
+
+  .modal__glow {
+    position: absolute;
+    top: -110px;
+    right: -110px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(193, 93, 104, 0.32), transparent 70%);
+    animation: coral-glow 11s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .modal__panel {
+    position: relative;
+    padding: 28px 30px 30px;
+    overflow-y: auto;
+    max-height: calc(100vh - 48px);
+  }
+
+  .modal__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .modal__label {
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--coral-tint);
+    margin-bottom: 10px;
+  }
+
+  .modal__hint {
+    font-family: var(--font-kr);
+    font-weight: 300;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #d5d0c7;
+  }
+
+  .modal__close {
+    background: none;
+    border: none;
+    color: var(--text-meta);
+    font-size: 15px;
+    cursor: pointer;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .modal__close:hover {
+    color: var(--coral);
+  }
+
+  .modal__rule {
+    height: 2px;
+    background: var(--dark-line-1);
+    margin: 20px 0;
+  }
+
+  .modal__rule--short {
+    max-width: 160px;
+    margin: 24px auto;
+  }
+
+  .modal__rule-fill {
+    display: block;
+    height: 100%;
+    background: var(--coral);
+    animation: steep-bar 9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  .modal__type-toggle {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .modal__type {
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: 1px solid var(--dark-line-3);
+    color: var(--text-meta);
+    font-family: var(--font-ui);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .modal__type.is-active {
+    border-color: var(--coral);
+    background: rgba(193, 93, 104, 0.14);
+    color: #fff;
+  }
+
+  .field {
+    display: block;
+    margin-bottom: 18px;
+  }
+
+  .field__label {
+    display: block;
+    font-family: var(--font-ui);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    color: var(--text-meta);
+    margin-bottom: 8px;
+  }
+
+  .field__required {
+    color: var(--coral);
+    font-style: normal;
+  }
+
+  .field__optional {
+    color: #7a746a;
+    font-style: normal;
+  }
+
+  .field input,
+  .field textarea {
+    width: 100%;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--dark-line-3);
+    color: #fff;
+    font-size: 14px;
+    padding: 8px 0;
+  }
+
+  .field textarea {
+    border: 1px solid var(--dark-line-3);
+    height: 88px;
+    padding: 10px;
+    resize: vertical;
+  }
+
+  .field input:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--coral);
+  }
+
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: var(--text-meta);
+  }
+
+  .modal__submit {
+    width: 100%;
+    background: var(--coral);
+    color: #fff;
+    border: none;
+    padding: 13px;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+
+  .modal__submit:hover {
+    opacity: 0.9;
+  }
+
+  .modal__note {
+    text-align: center;
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    color: #7a746a;
+    margin-top: 12px;
+  }
+
+  .modal__panel--done {
+    text-align: center;
+    padding: 44px 30px 40px;
+  }
+
+  .modal__done-text {
+    font-family: var(--font-kr);
+    font-weight: 300;
+    font-size: 22px;
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 480px) {
+    .modal {
+      width: calc(100vw - 24px);
+    }
+  }
+</style>

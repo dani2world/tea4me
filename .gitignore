@@ -34,3 +34,6 @@ admin/server.log
 
 # local Claude Code session state
 .claude/
+
+# impeccable 디자인 훅의 스캔 캐시(로컬 산출물) — 무시 규칙(config.json)만 버전 관리
+.impeccable/hook.cache.json

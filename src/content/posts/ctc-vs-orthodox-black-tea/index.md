@@ -1,5 +1,6 @@
 ---
 title: 홍차 잎이 작을수록, 오히려 맛은 진해진다
+titleBreak: "홍차 잎이 작을수록,<br>오히려 맛은 <em>진해진다</em>"
 slug: ctc-vs-orthodox-black-tea
 pubDate: '2026-08-21'
 type: info
@@ -19,7 +20,7 @@ coverImageAttribution:
 coverImageFocalPoint:
   x: 0.5
   'y': 0.5
-author: 티소믈리에
+author: 단희
 humanNote: 다음번엔 티백 안에 든 잎 모양을 한번 들여다보세요. 생각보다 재미있는 관찰이 될 거예요.
 keyTakeaways:
   - CTC는 Crush(으깨기)·Tear(찢기)·Curl(말기)의 약자로, 잎을 잘게 부수는 기계식 제다법이에요.

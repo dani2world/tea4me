@@ -1,47 +1,289 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Hero from '../components/Hero.astro';
 import PostCard from '../components/PostCard.astro';
+import TodayTea from '../components/TodayTea.astro';
+import { POST_TYPES, POST_TYPE_LABEL } from '../lib/postType';
+
+const base = import.meta.env.BASE_URL;
 
 const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+
+const featured = posts.find((p) => p.data.featured) ?? posts[0];
+const recent = posts.filter((p) => p.id !== featured?.id).slice(0, 9);
+const hasMore = posts.filter((p) => p.id !== featured?.id).length > recent.length;
 ---
 
 <BaseLayout title="TEA for ME">
-  <Hero />
-  <section id="latest" class="container latest">
-    <h2 class="latest__title">모든 글</h2>
-    {posts.length === 0 ? (
-      <p class="latest__empty">아직 발행된 글이 없습니다. 곧 첫 글로 찾아옵니다.</p>
-    ) : (
-      <div class="latest__grid">
-        {posts.map((post) => (
-          <PostCard post={post} />
+  <section class="masthead">
+    <div class="container">
+      <p class="masthead__tagline">SHARING TEA, SHARING MOMENTS</p>
+      <h1 class="masthead__wordmark">TEA <em>for</em> ME</h1>
+      <nav class="masthead__menu">
+        <a href={`${base}/about`}>about</a>
+        {POST_TYPES.map((t) => (
+          <a href={`${base}/type/${t}`}>{POST_TYPE_LABEL[t]}</a>
         ))}
-      </div>
-    )}
+      </nav>
+    </div>
   </section>
+
+  {posts.length === 0 ? (
+    <p class="container empty-state">아직 발행된 글이 없습니다. 곧 첫 글로 찾아옵니다.</p>
+  ) : (
+    <>
+      <section class="top-grid-section">
+        <div class="container top-grid">
+          <div class="top-grid__latest">
+            {featured && <PostCard post={featured} variant="latest" />}
+          </div>
+          <div class="top-grid__tea">
+            <TodayTea />
+          </div>
+        </div>
+      </section>
+
+      <section class="recent-section">
+        <div class="container recent">
+          <div class="recent__header">
+            <p class="recent__title">Recent — 최근 글</p>
+            <div class="recent__filters" data-filters>
+              <button type="button" class="recent__filter is-active" data-filter="all">All</button>
+              {POST_TYPES.map((t) => (
+                <button type="button" class="recent__filter" data-filter={t}>{POST_TYPE_LABEL[t]}</button>
+              ))}
+            </div>
+          </div>
+          <div class="recent__grid" data-recent-grid>
+            {recent.map((post) => (
+              <div class="recent__item" data-post-type={post.data.type}>
+                <PostCard post={post} />
+              </div>
+            ))}
+          </div>
+          {hasMore && (
+            <div class="recent__more">
+              <a class="btn btn--ghost" href={`${base}/type/${featured?.data.type ?? 'info'}`}>Read More</a>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section class="cup-section">
+        <div class="container">
+          <div class="cup-banner">
+            <div>
+              <p class="cup-banner__title">당신의 차 취향은 어느 쪽인가요?</p>
+              <p class="cup-banner__desc">다섯 가지 질문으로 오늘의 기분에 맞는 한 잔을 골라드려요.</p>
+            </div>
+            <a class="btn btn--primary" href={`${base}/find-your-cup`}>START →</a>
+          </div>
+        </div>
+      </section>
+    </>
+  )}
 </BaseLayout>
 
+<script>
+  const filters = document.querySelector<HTMLElement>('[data-filters]');
+  const grid = document.querySelector<HTMLElement>('[data-recent-grid]');
+  if (filters && grid) {
+    const buttons = Array.from(filters.querySelectorAll<HTMLButtonElement>('[data-filter]'));
+    const items = Array.from(grid.querySelectorAll<HTMLElement>('[data-post-type]'));
+
+    filters.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-filter]');
+      if (!btn) return;
+      buttons.forEach((b) => b.classList.toggle('is-active', b === btn));
+      const filter = btn.dataset.filter;
+      items.forEach((item) => {
+        const show = filter === 'all' || item.dataset.postType === filter;
+        item.style.display = show ? '' : 'none';
+      });
+    });
+  }
+</script>
+
 <style>
-  .latest {
-    padding-bottom: 96px;
+  .masthead {
+    text-align: center;
+    padding: 44px 0 13px;
+    border-bottom: 2px solid var(--border-strong);
   }
 
-  .latest__title {
-    font-size: 22px;
-    margin-bottom: 28px;
+  .masthead__tagline {
+    font-family: var(--font-ui);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    color: var(--coral);
+    margin-bottom: 8px;
   }
 
-  .latest__grid {
+  .masthead__wordmark {
+    font-family: var(--font-en);
+    font-weight: 700;
+    font-size: clamp(38px, 7vw, 60px);
+    letter-spacing: -0.01em;
+  }
+
+  .masthead__wordmark em {
+    font-style: italic;
+    color: var(--coral);
+  }
+
+  .masthead__menu {
+    display: flex;
+    justify-content: center;
+    gap: 34px;
+    margin-top: 18px;
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .masthead__menu a:hover {
+    color: var(--coral);
+  }
+
+  .top-grid-section {
+    /* 마스트헤드의 border-bottom과 마찬가지로 화면 전체 폭으로 이어지는 선 —
+       .top-grid(컨테이너, 1200px 폭)가 아니라 바깥 섹션에 줘야 끝까지 닿는다. */
+    border-bottom: 2px solid var(--border-strong);
+  }
+
+  .top-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
+    grid-template-columns: 1.55fr 1fr;
+    padding-top: 0;
   }
 
-  .latest__empty {
-    color: var(--text-muted);
+  .top-grid__latest {
+    padding: 30px 32px 32px 0;
+    border-right: 1px solid var(--border-soft);
+  }
+
+  .top-grid__tea {
+    padding-left: 32px;
+  }
+
+  .top-grid__tea :global(.tea) {
+    min-height: 100%;
+  }
+
+  @media (max-width: 900px) {
+    .top-grid {
+      grid-template-columns: 1fr;
+      display: flex;
+      flex-direction: column-reverse;
+    }
+
+    .top-grid__latest {
+      padding: 24px 0;
+      border-right: none;
+      border-top: 1px solid var(--border-soft);
+    }
+
+    .top-grid__tea {
+      padding-left: 0;
+    }
+  }
+
+  .recent {
+    /* 주의: 이 요소는 .container와 함께 쓰이므로 좌우 padding을 절대 건드리지 말 것 —
+       shorthand(예: padding: 44px 0 60px)는 좌우를 0으로 덮어써 .container의 34px
+       여백을 지워버린다(과거에 실제로 이 버그가 있었음). top/bottom만 개별 지정한다. */
+    padding-top: 44px;
+    padding-bottom: 60px;
+  }
+
+  .recent__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-strong);
+    margin-bottom: 26px;
+  }
+
+  .recent__title {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .recent__filters {
+    display: flex;
+    gap: 18px;
+  }
+
+  .recent__filter {
+    background: none;
+    border: none;
+    padding: 0 0 4px;
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--text-meta);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+  }
+
+  .recent__filter.is-active {
+    color: var(--coral);
+    border-bottom-color: var(--coral);
+  }
+
+  .recent__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 26px 22px;
+  }
+
+  .recent__more {
+    text-align: center;
+    margin-top: 40px;
+  }
+
+  .cup-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    border: 2px solid var(--coral);
+    padding: 26px 30px;
+    margin-bottom: 64px;
+  }
+
+  .cup-banner__title {
+    font-family: var(--font-en);
+    font-weight: 400;
+    font-size: 26px;
+  }
+
+  .cup-banner__desc {
+    font-family: var(--font-kr);
+    font-weight: 300;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+  }
+
+  @media (max-width: 720px) {
+    .recent__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px 16px;
+    }
   }
 </style>

@@ -19,7 +19,7 @@ coverImageAttribution:
 coverImageFocalPoint:
   x: 0.5
   'y': 0.55
-author: 티소믈리에
+author: 단희
 humanNote: ‘오래된 보이차가 좋다‘는 말을 들으면, 어떤 보이차인지 어떻게 보관됐는지 물어보면 어떨까요?
 keyTakeaways:
   - 보이차는 생차(生茶)와 숙차(熟茶)로 나뉘며 발효 방식이 다름

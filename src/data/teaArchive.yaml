@@ -1,0 +1,47 @@
+# "오늘의 차" 날짜별 아카이브 — 날짜 / 차 이름 / Linger with(pairing)만 기록.
+# 어드민에서 명시적으로 등록한 날짜와, 등록을 건너뛰어 폴백(같은 계절 과거 등록분 중
+# 해시로 결정)된 날짜가 모두 섞여 있다 — src/lib/todayTea.ts의 pickTodayTea()와 동일한
+# 규칙으로 계산해 채웠다. 새로 등록되는 날은 admin 발행 때 자동으로 쌓인다
+# (admin/server/routes/teas.js -> teaWriter.js의 archiveTea 참고).
+# 폴백으로 채워진 날짜는 그 시점의 추천풀 상태를 기준으로 계산된 값이라, 추천풀이
+# 이후에 바뀌어도 여기 기록은 소급되어 바뀌지 않는다(과거 기록의 안정성을 위해 고정값으로 저장).
+
+- date: "2026-08-17"
+  name: 호지차
+  pairing: 카스텔라
+- date: "2026-08-18"
+  name: 센차
+  pairing: 양갱
+- date: "2026-08-19"
+  name: 벽라춘
+  pairing: 과일양갱
+- date: "2026-08-20"
+  name: 벽라춘
+  pairing: 과일양갱
+- date: "2026-08-21"
+  name: 벽라춘
+  pairing: 과일양갱
+- date: "2026-08-22"
+  name: 호지차
+  pairing: 카스텔라
+- date: "2026-08-23"
+  name: 센차
+  pairing: 양갱
+- date: "2026-08-24"
+  name: 벽라춘
+  pairing: 과일양갱
+- date: "2026-08-25"
+  name: 보성 녹차
+  pairing: 흑임자다식
+- date: "2026-08-26"
+  name: 호지차
+  pairing: 카스텔라
+- date: "2026-08-27"
+  name: 센차
+  pairing: 양갱
+- date: "2026-08-28"
+  name: 벽라춘
+  pairing: 과일양갱
+- date: "2026-08-29"
+  name: 보성 녹차
+  pairing: 흑임자다식

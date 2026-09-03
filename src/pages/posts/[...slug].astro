@@ -3,17 +3,24 @@ import { getCollection, render } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('posts', ({ data }) => !data.draft);
-  return posts.map((post) => ({
+  const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+  );
+  return posts.map((post, index) => ({
     params: { slug: post.id },
-    props: { post },
+    props: {
+      post,
+      // 정렬 기준 최신순이므로 "다음 글"은 배열상 앞(더 최신), "이전 글"은 뒤(더 과거).
+      prev: posts[index + 1] ?? null,
+      next: posts[index - 1] ?? null,
+    },
   }));
 }
 
-const { post } = Astro.props;
-const { Content } = await render(post);
+const { post, prev, next } = Astro.props;
+const { Content, headings } = await render(post);
 ---
 
-<PostLayout post={post}>
+<PostLayout post={post} headings={headings} prev={prev} next={next}>
   <Content />
 </PostLayout>

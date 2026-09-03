@@ -1,0 +1,58 @@
+---
+import { POST_TYPES, POST_TYPE_LABEL } from '../lib/postType';
+
+const base = import.meta.env.BASE_URL;
+const path = Astro.url.pathname.replace(base, '') || '/';
+
+const items = [
+  { href: `${base}/`, label: '홈', active: path === '/' || path === '' },
+  { href: `${base}/find-your-cup`, label: '취향찾기', active: path.startsWith('/find-your-cup') },
+  ...POST_TYPES.map((t) => ({
+    href: `${base}/type/${t}`,
+    label: POST_TYPE_LABEL[t],
+    active: path.startsWith(`/type/${t}`),
+  })),
+];
+---
+
+<nav class="tabbar">
+  {items.map((item) => (
+    <a href={item.href} class:list={['tabbar__item', { 'is-active': item.active }]}>{item.label}</a>
+  ))}
+</nav>
+
+<style>
+  .tabbar {
+    display: none;
+  }
+
+  @media (max-width: 720px) {
+    .tabbar {
+      display: flex;
+      justify-content: space-around;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 40;
+      background: var(--ink);
+      border-top: 1px solid var(--dark-line-1);
+      padding: 12px 0 14px;
+    }
+
+    .tabbar__item {
+      font-family: var(--font-ui);
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--text-meta);
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+
+    .tabbar__item.is-active {
+      color: var(--coral);
+    }
+  }
+</style>
