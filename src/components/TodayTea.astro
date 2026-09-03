@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { getKSTDateString, pickTodayTea, formatDisplayDate } from '../lib/todayTea';
+import { getKSTDateString, pickTodayTea, formatMonoDate } from '../lib/todayTea';
 
 const entries = await getCollection('teas', ({ data }) => !data.draft);
 const catalog = entries.map((e) => e.data);
@@ -14,29 +14,32 @@ const catalogJson = JSON.stringify(catalog).replace(/</g, '\\u003c');
 
 {pick && (
   <article class="tea" data-server-date={todayStr}>
-    <p class="tea__label">
-      <span class="tea__leaf" aria-hidden="true">🍃</span>
-      <span>오늘의 차</span>
-      <span class="tea__date" data-field="date">{formatDisplayDate(todayStr)}</span>
-    </p>
+    <div class="tea__glow" aria-hidden="true"></div>
+
+    <div class="tea__top">
+      <p class="tea__label">🍃 오늘의 차</p>
+      <p class="tea__date" data-field="date">{formatMonoDate(todayStr)}</p>
+    </div>
 
     <h2 class="tea__name" data-field="name">{pick.name}</h2>
+
+    <div class="tea__rule" aria-hidden="true"><span class="tea__rule-fill"></span></div>
+
     <p class="tea__message" data-field="message">{pick.message}</p>
 
     <dl class="tea__specs">
       <div class="tea__spec">
         <dt>Brewing Tip</dt>
-        <dd class="tea__spec-value tea__spec-value--num" data-field="brewingTip">{pick.brewingTip}</dd>
+        <dd data-field="brewingTip">{pick.brewingTip}</dd>
       </div>
       <div class="tea__spec">
         <dt>Linger with</dt>
-        <dd class="tea__spec-value" data-field="pairing">{pick.pairing}</dd>
+        <dd data-field="pairing">{pick.pairing}</dd>
       </div>
     </dl>
 
     <p class="tea__moment">
-      <span class="tea__moment-flower" aria-hidden="true">🌷</span>
-      <span class="tea__moment-text" data-field="moment">{pick.moment}</span>
+      <span aria-hidden="true">🌷</span> <span data-field="moment">{pick.moment}</span>
     </p>
   </article>
 )}
@@ -44,7 +47,7 @@ const catalogJson = JSON.stringify(catalog).replace(/</g, '\\u003c');
 <script type="application/json" id="tea-catalog-data" set:html={catalogJson} />
 
 <script>
-  import { getKSTDateString, pickTodayTea, formatDisplayDate } from '../lib/todayTea';
+  import { getKSTDateString, pickTodayTea, formatMonoDate } from '../lib/todayTea';
 
   const root = document.querySelector<HTMLElement>('.tea');
   if (root) {
@@ -60,7 +63,7 @@ const catalogJson = JSON.stringify(catalog).replace(/</g, '\\u003c');
           const el = root.querySelector(`[data-field="${field}"]`);
           if (el) el.textContent = value;
         };
-        set('date', formatDisplayDate(clientDate));
+        set('date', formatMonoDate(clientDate));
         set('name', pick.name);
         set('message', pick.message);
         set('brewingTip', pick.brewingTip);
@@ -74,184 +77,133 @@ const catalogJson = JSON.stringify(catalog).replace(/</g, '\\u003c');
 
 <style>
   .tea {
-    --tea-rule: color-mix(in srgb, var(--sage) 34%, transparent);
-
     position: relative;
     overflow: hidden;
-    background: var(--card-bg);
-    border-radius: 14px;
-    box-shadow: 0 10px 30px -12px var(--shadow);
-    padding: 26px 26px 24px;
+    background: var(--ink);
+    color: #fff;
+    padding: 26px 28px 28px;
     width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    animation: tea-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    justify-content: flex-start;
   }
 
-  /* 우려낸 찻물이 위쪽에 옅게 배어 있는 느낌 — 카드를 나누지 않고 결만 준다. */
-  .tea::before {
-    content: '';
+  .tea__glow {
     position: absolute;
-    inset: 0 0 auto;
-    height: 140px;
-    background: linear-gradient(
-      to bottom,
-      color-mix(in srgb, var(--sage) 13%, transparent),
-      transparent
-    );
+    top: -110px;
+    right: -110px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(193, 93, 104, 0.32), transparent 70%);
+    animation: coral-glow 11s ease-in-out infinite;
     pointer-events: none;
   }
 
-  .tea > * {
+  .tea > *:not(.tea__glow) {
     position: relative;
   }
 
-  /* 진입은 한 번만, 안쪽 요소가 순서대로 따라 들어온다. */
-  @keyframes tea-rise {
-    from {
-      opacity: 0;
-      transform: translateY(14px);
-    }
-  }
-
-  .tea__label,
-  .tea__name,
-  .tea__message,
-  .tea__specs,
-  .tea__moment {
-    animation: tea-settle 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  .tea__label { animation-delay: 0.08s; }
-  .tea__name { animation-delay: 0.16s; }
-  .tea__message { animation-delay: 0.24s; }
-  .tea__specs { animation-delay: 0.32s; }
-  .tea__moment { animation-delay: 0.4s; }
-
-  @keyframes tea-settle {
-    from {
-      opacity: 0;
-      transform: translateY(6px);
-    }
+  .tea__top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    animation: fade-up-stagger 1s cubic-bezier(0.2, 0.7, 0.3, 1) both;
   }
 
   .tea__label {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-family: var(--font-label);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    color: var(--accent-text);
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--coral-tint);
   }
 
   .tea__date {
-    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 10px;
     font-weight: 500;
+    color: var(--text-meta);
     font-variant-numeric: tabular-nums;
-    color: var(--text-muted);
-  }
-
-  .tea__leaf {
-    display: inline-block;
-    font-size: 13px;
-    animation: tea-leaf 6s ease-in-out infinite;
-  }
-
-  @keyframes tea-leaf {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-2px) rotate(-7deg); }
   }
 
   .tea__name {
-    font-size: clamp(26px, 3.4vw, 31px);
-    font-weight: 800;
-    letter-spacing: -0.025em;
-    line-height: 1.2;
+    font-family: var(--font-kr);
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 1.15;
+    margin-top: 14px;
     text-wrap: balance;
-    margin-top: -4px;
+    animation: fade-up-stagger 1s 0.15s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+
+  .tea__rule {
+    height: 2px;
+    background: var(--dark-line-1);
+    margin: 18px 0 16px;
+  }
+
+  .tea__rule-fill {
+    display: block;
+    height: 100%;
+    background: var(--coral);
+    animation: steep-bar 9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
 
   .tea__message {
-    font-size: 15px;
-    line-height: 1.75;
-    color: var(--text-muted);
+    font-family: var(--font-kr);
+    font-weight: 300;
+    font-size: 13px;
+    line-height: 1.85;
+    color: #d5d0c7;
     text-wrap: pretty;
+    animation: fade-up-stagger 1s 0.3s cubic-bezier(0.2, 0.7, 0.3, 1) both;
   }
 
   .tea__specs {
+    margin: 16px 0 0;
     display: grid;
-    gap: 10px;
-    margin: 0;
-    padding-top: 17px;
-    border-top: 1px solid var(--tea-rule);
+    gap: 9px;
   }
 
   .tea__spec {
     display: flex;
     align-items: baseline;
-    gap: 14px;
+    justify-content: space-between;
+    padding-bottom: 8px;
+    border-bottom: 1px dotted var(--dark-line-3);
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
   }
 
   .tea__spec dt {
-    flex: 0 0 84px;
-    font-family: var(--font-label);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--sage-label);
+    color: var(--text-meta);
   }
 
-  .tea__spec-value {
+  .tea__spec dd {
     margin: 0;
-    font-size: 14.5px;
-    font-weight: 600;
-    color: var(--text);
+    color: #fff;
   }
 
-  .tea__spec-value--num {
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* 라벨 없이 한 줄로 맺는 자리 — 꽃 글리프를 들여쓰기 기준으로 삼아
-     두 줄로 넘어가도 문장이 글리프 아래로 흘러들지 않게 한다. */
   .tea__moment {
-    display: flex;
-    align-items: baseline;
-    gap: 7px;
+    margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid var(--tea-rule);
+    font-family: var(--font-kr);
+    font-weight: 300;
+    font-size: 13.5px;
+    color: var(--coral-tint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    animation: quote-breathe 7s ease-in-out infinite;
   }
 
-  .tea__moment-flower {
-    flex: none;
-    font-size: 13px;
-  }
-
-  .tea__moment-text {
-    font-size: 14.5px;
-    line-height: 1.6;
-    color: var(--accent-text);
-    text-wrap: pretty;
-  }
-
-  .tea ::selection {
-    background: color-mix(in srgb, var(--sage) 34%, transparent);
-    color: var(--text);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .tea,
-    .tea__label,
-    .tea__name,
-    .tea__message,
-    .tea__specs,
-    .tea__moment,
-    .tea__leaf {
-      animation: none;
+  @media (max-width: 720px) {
+    .tea__moment {
+      white-space: normal;
     }
   }
 </style>

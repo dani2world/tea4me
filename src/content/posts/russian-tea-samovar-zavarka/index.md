@@ -19,7 +19,7 @@ coverImageAttribution:
 coverImageFocalPoint:
   x: 0.55
   'y': 0.3
-author: 티소믈리에
+author: 단희
 humanNote: 러시아의 자바르카는 커피의 에스프레소 같은 역할 아닐까요? 세계엔 참 다양한 차 문화가 존재해요!
 keyTakeaways:
   - 러시아 홍차는 진한 농축액(자바르카)을 뜨거운 물로 희석해서 마셔요.

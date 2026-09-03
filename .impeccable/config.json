@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/layouts/PostLayout.astro"
+        ],
+        "createdAt": "2026-08-23T05:39:07.731Z",
+        "reason": "design handoff spec explicitly mandates coral left-border accents (blockquote 3px, TOC active item 2px) with literal hex/px values — see design_handoff_tea4me_redesign/README.md Screens 2. 글 상세"
+      }
+    ]
+  }
+}

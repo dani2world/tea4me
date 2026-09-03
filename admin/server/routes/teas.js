@@ -1,7 +1,7 @@
 const express = require('express');
 const { CONTENT_TEAS_FILE } = require('../paths');
 const { getSituations, pickCandidate, updateRow } = require('../services/teaPool');
-const { readCatalog, writeTea } = require('../services/teaWriter');
+const { readCatalog, writeTea, archiveTea } = require('../services/teaWriter');
 const { publish } = require('../services/gitPublisher');
 
 const router = express.Router();
@@ -88,6 +88,7 @@ router.post('/publish', async (req, res) => {
 
   try {
     writeTea(entry);
+    archiveTea({ date: entry.date, name: entry.name, pairing: entry.pairing });
 
     // 엑셀 되돌려쓰기는 실패해도 발행 자체를 막지 않는다 (파일이 엑셀로 열려 있는 등).
     let poolUpdated = true;

@@ -16,7 +16,7 @@ coverImageAttribution:
   photographerUrl: https://www.pexels.com/@freestockpro
   source: pexels
   sourceUrl: https://www.pexels.com/photo/choice-of-herbal-tea-on-market-12944684/
-author: 티소믈리에
+author: 단희
 keyTakeaways:
   - "OP·FOP·TGFOP는 맛의 등급이 아니라 찻잎 크기와 채엽 부위를 나타내는 표기"
   - "알파벳이 많다고 맛과 향이 더 낫다는 보장은 없다"

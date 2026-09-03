@@ -19,7 +19,7 @@ coverImageAttribution:
 coverImageFocalPoint:
   x: 0.58
   'y': 0.55
-author: 티소믈리에
+author: 단희
 humanNote: 올바른 자사호 관리로 오랫동안 향기로운 차생활 하세요 :)
 keyTakeaways:
   - 자사호는 중국 이싱(宜興)의 점토로 빚은 무유약 찻주전자예요.

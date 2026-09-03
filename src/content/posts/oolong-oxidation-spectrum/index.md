@@ -19,7 +19,7 @@ coverImageAttribution:
 coverImageFocalPoint:
   x: 0.45
   'y': 0.55
-author: 티소믈리에
+author: 단희
 humanNote: |-
   우롱차로만 메뉴판을 가득 채운 찻집도 있다니,
   그 배리어가 얼마나 넓은지 짐작이 가죠?

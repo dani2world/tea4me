@@ -5,6 +5,7 @@ const ADMIN_ROOT = path.resolve(__dirname, '..');
 const REPO_ROOT = path.resolve(ADMIN_ROOT, '..');
 const CONTENT_POSTS_DIR = path.join(REPO_ROOT, 'src', 'content', 'posts');
 const CONTENT_TEAS_FILE = path.join(REPO_ROOT, 'src', 'content', 'teas', 'teas.yaml');
+const TEA_ARCHIVE_FILE = path.join(REPO_ROOT, 'src', 'data', 'teaArchive.yaml');
 const DATA_DIR = path.join(ADMIN_ROOT, 'data');
 const DATA_POSTS_DIR = path.join(DATA_DIR, 'posts');
 
@@ -22,6 +23,7 @@ module.exports = {
   REPO_ROOT,
   CONTENT_POSTS_DIR,
   CONTENT_TEAS_FILE,
+  TEA_ARCHIVE_FILE,
   DATA_DIR,
   DATA_POSTS_DIR,
   ensureDir,

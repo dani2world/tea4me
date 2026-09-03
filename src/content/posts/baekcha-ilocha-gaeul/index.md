@@ -8,7 +8,7 @@ tags: ["백차", "가을차", "티타임"]
 excerpt: "가을볕이 드는 창가에서 백호은침을 세 번 우려 마신 어느 오후의 기록."
 coverImage: "./cover.jpg"
 coverImageAlt: "가을 오후 창가에서 우려낸 백차"
-author: "티소믈리에"
+author: "단희"
 humanNote: "그냥, 오래 기다린 잔이 결국 제일 남는 것 같다."
 draft: false
 ---

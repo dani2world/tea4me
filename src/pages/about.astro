@@ -1,12 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactModal from '../components/ContactModal.astro';
 ---
 
 <BaseLayout title="소개 · TEA for ME" description="차에 관한 이야기와 직접 마셔본 차의 기록, 그리고 차를 마시며 만난 순간들을 담습니다.">
-  <section class="container about">
-    <p class="about__label">About</p>
-    <h1 class="about__title">차 한잔에서 시작되는<br />작은 순간들</h1>
-    <div class="about__body">
+  <section class="container intro">
+    <p class="intro__label">About</p>
+    <h1 class="intro__title">차 한잔에서 시작되는<br />작은 순간들</h1>
+    <div class="intro__body">
       <p>
         차의 매력에 빠져 차를 공부했고, 티 소믈리에가 되었습니다. 하지만 차를 알아갈수록
         제가 좋아하게 된 건 차 자체만은 아니었습니다. 어떤 날에는 한 잔의 차가 계절의
@@ -21,52 +22,322 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         놓아보기도 합니다. 빠르게 소비되는 정보보다는 한 잔이 천천히 우러나는 시간처럼,
         잠시 머물러 읽을 수 있는 이야기를 만들고 싶습니다.
       </p>
-      <p>
-        <strong class="about__tagline">Sharing tea, sharing moments.</strong>
-        차를 나누는 것은 어쩌면 시간을 나누는 일인지도 모르겠습니다. 이곳에서 만난 차 한
-        잔이 누군가의 평범한 하루에 작은 쉼이 되고, 바쁜 마음을 잠시 늦추는 계기가
-        되었으면 합니다. 그리고 언젠가 이 공간을 찾아온 당신이 “오늘은 이 차를 마셔볼까?”
-        하고 자신의 순간을 하나 골라갈 수 있기를 기대해 봅니다.
-      </p>
-      <p>오늘, 차 한 잔 어떠세요? :)</p>
     </div>
   </section>
+
+  <section class="container three-posts">
+    <div class="three-posts__grid">
+      <article class="three-posts__card">
+        <p class="three-posts__num">01</p>
+        <h3 class="three-posts__name">차 이야기</h3>
+        <p class="three-posts__name-en">TEA NOTES</p>
+        <p class="three-posts__desc">알아두면 차가 더 맛있어지는 것들. 제다법, 등급 표기, 다구 관리처럼 헷갈리기 쉬운 이야기를 하나씩 풀어요.</p>
+      </article>
+      <article class="three-posts__card">
+        <p class="three-posts__num">02</p>
+        <h3 class="three-posts__name">리뷰</h3>
+        <p class="three-posts__name-en">REVIEWS</p>
+        <p class="three-posts__desc">직접 마셔본 차의 기록. 어떤 향이 났고 몇 번까지 우려졌는지, 좋았던 점과 아쉬웠던 점을 그대로 씁니다.</p>
+      </article>
+      <article class="three-posts__card">
+        <p class="three-posts__num">03</p>
+        <h3 class="three-posts__name">차후감</h3>
+        <p class="three-posts__name-en">TEA Moment</p>
+        <p class="three-posts__desc">한 잔 뒤에 남은 생각. 차와 함께 있던 계절, 음악, 책에 대한 짧은 글이에요. 정보가 아니라 여백입니다.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="container">
+    <div class="writer">
+      <div class="writer__glow" aria-hidden="true"></div>
+      <div class="writer__body">
+        <p class="writer__tagline">Sharing tea, sharing moments.</p>
+        <h2 class="writer__name">단희 <span class="writer__handle">(@_adore_dani)</span></h2>
+        <div class="writer__rule" aria-hidden="true"><span class="writer__rule-fill"></span></div>
+        <p class="writer__bio">
+          차를 나누는 것은 어쩌면 시간을 나누는 일인지도 모르겠습니다.<br />
+          이곳에서 만난 차 한 잔이 누군가의 평범한 하루에 작은 쉼이 되고, 바쁜 마음을 잠시 늦추는 계기가 되었으면 합니다. 그리고 언젠가 이 공간을 찾아온 당신이 "오늘은 이 차를 마셔볼까?" 하고 자신의 순간을 하나 골라갈 수 있기를 기대해 봅니다.
+        </p>
+        <div class="writer__foot">
+          <p class="writer__quote">오늘, 차 한 잔 어떠세요? :)</p>
+          <button type="button" class="writer__contact-btn" data-open-contact>문의 · 응원글 남기기 →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!--
+    뉴스레터 배너 — 아직 구독 서비스가 없어 렌더하지 않습니다.
+    서비스를 붙인 뒤에는 아래 <section> 블록의 주석만 풀면 됩니다.
+    (열기 방법은 프로젝트 루트 README.md "뉴스레터 배너 켜기" 참고)
+
+  <section class="container">
+    <div class="newsletter">
+      <p class="newsletter__label">A LETTER, EVERY SUNDAY</p>
+      <h3 class="newsletter__title">일요일 아침, 한 잔의 편지</h3>
+      <p class="newsletter__desc">그 주에 마신 차 한 가지와 곁에 두었던 책·음악을 함께 보내드려요.</p>
+      <form class="newsletter__form">
+        <input type="email" placeholder="your@email.com" required />
+        <button type="submit" class="btn btn--primary">구독</button>
+      </form>
+    </div>
+  </section>
+  -->
+
+  <ContactModal />
 </BaseLayout>
 
 <style>
-  .about {
+  .intro {
     max-width: 640px;
-    padding: 72px 24px 96px;
+    text-align: center;
+    padding: 56px 34px 50px;
   }
 
-  .about__label {
-    font-family: var(--font-label);
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--accent);
+  .intro__label {
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--coral);
     margin-bottom: 18px;
   }
 
-  .about__title {
-    font-size: clamp(28px, 4vw, 40px);
-    line-height: 1.3;
-    margin-bottom: 32px;
+  .intro__title {
+    font-family: var(--font-kr);
+    font-weight: 400;
+    font-size: clamp(26px, 4vw, 40px);
+    line-height: 1.4;
+    margin-bottom: 30px;
   }
 
-  .about__body {
-    font-size: 17px;
+  .intro__title em {
+    font-family: var(--font-en), var(--font-kr);
+    font-style: italic;
+    color: var(--coral);
+  }
+
+  .intro__body {
+    text-align: left;
+    font-family: var(--font-kr);
+    font-weight: 300;
+    font-size: 15px;
+    line-height: 2;
+    color: var(--text-body);
+  }
+
+  .intro__body p + p {
+    margin-top: 1.4em;
+  }
+
+  .three-posts {
+    padding-bottom: 20px;
+  }
+
+  .three-posts__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    max-width: 70%;
+    margin: 0 auto;
+  }
+
+  .three-posts__card {
+    border: 1px solid var(--border-soft);
+    padding: 26px 24px 28px;
+  }
+
+  .three-posts__num {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--coral);
+    margin-bottom: 14px;
+  }
+
+  .three-posts__name {
+    font-family: var(--font-kr);
+    font-weight: 400;
+    font-size: 26px;
+    margin-bottom: 6px;
+  }
+
+  .three-posts__name-en {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-meta);
+    margin-bottom: 14px;
+  }
+
+  .three-posts__desc {
+    font-family: var(--font-kr);
+    font-weight: 300;
+    font-size: 13px;
     line-height: 1.9;
-    color: var(--text);
+    color: var(--text-secondary);
   }
 
-  .about__body p {
-    margin-bottom: 1.4em;
+  .writer {
+    position: relative;
+    overflow: hidden;
+    background: var(--ink);
+    color: #fff;
+    padding: 32px;
+    max-width: 70%;
+    margin: 50px auto 64px;
   }
 
-  /* 원문에서 한 줄로 서 있던 영문 문장 — 뒤 문장과 붙지 않게 줄을 지킨다. */
-  .about__tagline {
+  .writer__glow {
+    position: absolute;
+    top: -110px;
+    right: -110px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(193, 93, 104, 0.32), transparent 70%);
+    animation: coral-glow 11s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .writer__body {
+    position: relative;
+  }
+
+  .writer__tagline {
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--coral-tint);
+    margin-bottom: 10px;
+  }
+
+  .writer__name {
+    font-family: var(--font-kr);
+    font-weight: 400;
+    font-size: 34px;
+    margin-bottom: 16px;
+  }
+
+  .writer__handle {
+    font-family: var(--font-ui);
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    color: var(--text-meta);
+  }
+
+  .writer__rule {
+    height: 2px;
+    background: var(--dark-line-1);
+    margin-bottom: 16px;
+  }
+
+  .writer__rule-fill {
     display: block;
+    height: 100%;
+    background: var(--coral);
+    animation: steep-bar 9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  .writer__bio {
+    font-family: var(--font-kr);
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 1.95;
+    color: #d5d0c7;
+    margin-bottom: 22px;
+  }
+
+  .writer__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .writer__quote {
+    font-family: var(--font-kr);
+    font-weight: 300;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--coral-tint);
+  }
+
+  .writer__contact-btn {
+    background: none;
+    border: 1px solid var(--dark-line-3);
+    color: #fff;
+    padding: 11px 22px;
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .writer__contact-btn:hover {
+    border-color: var(--coral);
+    color: var(--coral);
+  }
+
+  .newsletter {
+    border: 1px solid var(--border-soft);
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 64px;
+  }
+
+  .newsletter__label {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--coral);
+    margin-bottom: 12px;
+  }
+
+  .newsletter__title {
+    font-family: var(--font-kr);
+    font-weight: 400;
+    font-size: 26px;
+    margin-bottom: 10px;
+  }
+
+  .newsletter__desc {
+    font-family: var(--font-kr);
+    font-weight: 300;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 22px;
+  }
+
+  .newsletter__form {
+    display: flex;
+    gap: 10px;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .newsletter__form input {
+    flex: 1;
+    border: 1px solid var(--border-soft);
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  @media (max-width: 720px) {
+    .three-posts__grid {
+      grid-template-columns: 1fr;
+      max-width: 100%;
+    }
+
+    .writer {
+      max-width: 100%;
+      padding: 24px;
+    }
   }
 </style>
