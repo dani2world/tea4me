@@ -2,7 +2,7 @@
 title: "가을 오후, 백차 한 잔"
 slug: "baekcha-gaeul-ohu"
 pubDate: 2026-08-10
-type: "experience"
+type: "review"
 category: "백차"
 tags: ["백차", "가을차", "티타임"]
 excerpt: "가을볕이 드는 창가에서 백호은침을 세 번 우려 마신 어느 오후의 기록."
