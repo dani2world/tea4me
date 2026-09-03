@@ -169,7 +169,7 @@ const focal = data.coverImageFocalPoint;
   }
 
   .post-card--latest .post-card__thumb {
-    height: 124px;
+    height: 134px;
     margin-top: 16px;
   }
 
@@ -179,6 +179,11 @@ const focal = data.coverImageFocalPoint;
     font-size: 38px;
     line-height: 1.16;
     letter-spacing: -0.02em;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .post-card--latest .post-card__title--latest :global(em) {
