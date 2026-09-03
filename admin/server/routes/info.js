@@ -84,7 +84,6 @@ router.post('/:id/publish', async (req, res) => {
       coverImageAlt: content.coverImageAlt,
       coverImageAttribution: content.coverImageAttribution,
       coverImageFocalPoint: content.coverImageFocalPoint || { x: 0.5, y: 0.5 },
-      author: '티소믈리에',
       humanNote,
       ...(content.keyTakeaways?.length ? { keyTakeaways: content.keyTakeaways } : {}),
     };

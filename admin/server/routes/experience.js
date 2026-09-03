@@ -90,14 +90,13 @@ router.post('/:id/publish', async (req, res) => {
       title: content.title,
       slug: content.slug,
       pubDate: new Date().toISOString().slice(0, 10),
-      type: 'experience',
+      type: 'review',
       category: content.category,
       tags: content.tags || [],
       excerpt: content.excerpt,
       coverImage: './cover.jpg',
       coverImageAlt: content.coverImageAlt,
       coverImageFocalPoint: content.coverImageFocalPoint || { x: 0.5, y: 0.5 },
-      author: '티소믈리에',
       ...(humanNote ? { humanNote } : {}),
     };
     const coverImageSourcePath = path.join(postWorkDir(postId), 'edited_images', 'cover.jpg');
