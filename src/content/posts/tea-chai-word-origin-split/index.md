@@ -1,5 +1,6 @@
 ---
 title: 티(tea)와 차이(chai), 사실 한 글자에서 갈라졌다
+titleBreak: "티(tea)와 차이(chai),<br>사실 한 글자에서 <em>갈라졌다</em>"
 slug: tea-chai-word-origin-split
 pubDate: '2026-09-03'
 type: info
@@ -19,7 +20,7 @@ coverImageAttribution:
 coverImageFocalPoint:
   x: 0.5
   'y': 0.45
-author: 티소믈리에
+author: 단희
 humanNote: 저는 오늘 티(Tea) 대신 차(茶)를 한잔 마실게요 :)
 keyTakeaways:
   - 전 세계 '차'를 부르는 말은 크게 '테(te)' 계열과 '차(cha)' 계열, 두 갈래로 나뉜다
