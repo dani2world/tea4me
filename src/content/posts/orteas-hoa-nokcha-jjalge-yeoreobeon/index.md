@@ -2,7 +2,7 @@
 title: 올티스 호아 녹차와 함께한 싱그러운 시간
 slug: orteas-hoa-nokcha-jjalge-yeoreobeon
 pubDate: '2026-09-09'
-type: experience
+type: review
 category: 녹차
 tags:
   - 올티스
@@ -16,7 +16,7 @@ coverImageAlt: 검은 다관 안에 우려진 연둣빛 녹차 엽저와 뒤로 
 coverImageFocalPoint:
   x: 0.55
   'y': 0.55
-author: 티소믈리에
+author: 단희
 humanNote: 싱그럽고 아기자기한 시간, 올티스 호아 녹차와 함께였습니다 :)
 ---
 
