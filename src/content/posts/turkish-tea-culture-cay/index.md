@@ -1,7 +1,7 @@
 ---
 title: 커피의 나라라고 알려진 튀르키예, 정작 매일 마시는 건 차였다
 slug: turkish-tea-culture-cay
-pubDate: '2026-09-09'
+pubDate: '2026-09-09T18:20:25+09:00'
 type: info
 category: 서양·글로벌 티 문화
 tags:
@@ -19,7 +19,7 @@ coverImageAttribution:
 coverImageFocalPoint:
   x: 0.35
   'y': 0.55
-author: 티소믈리에
+author: 단희
 humanNote: 튀르키예의 달콤한 디저트와 함께 하는 차 한잔, 멋지죠?
 keyTakeaways:
   - 튀르키예는 커피보다 차를 훨씬 많이 마시는 나라로 여러 조사에서 꼽혔다

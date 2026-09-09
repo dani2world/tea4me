@@ -75,7 +75,7 @@ router.post('/:id/publish', async (req, res) => {
     const data = {
       title: content.title,
       slug: content.slug,
-      pubDate: new Date().toISOString().slice(0, 10),
+      pubDate: new Date().toISOString(),
       type: 'info',
       category: content.category,
       tags: content.tags || [],
