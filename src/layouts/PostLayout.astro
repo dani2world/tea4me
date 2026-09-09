@@ -372,6 +372,27 @@ const toc = headings.filter((h) => h.depth === 2);
     margin-top: 0.5em;
   }
 
+  /* 사진 여러 장을 1:1로 나란히 붙이는 유틸 클래스 — 본문에 raw HTML로 붙여넣는다.
+     이미지 최적화 파이프라인을 타야 해서 <div> 사이에 마크다운 ![]() 문법을 쓰는데,
+     그러면 각 이미지가 <p>로 감싸져 나온다 — 그 <p>들을 flex 아이템으로 삼는다. */
+  .post__content :global(.photo-row) {
+    display: flex;
+    gap: 8px;
+    margin: 1.8em 0;
+  }
+
+  .post__content :global(.photo-row p) {
+    flex: 1;
+    margin: 0;
+  }
+
+  .post__content :global(.photo-row img) {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    margin-top: 0;
+  }
+
   .post__content :global(em) {
     display: block;
     font-size: 13px;
