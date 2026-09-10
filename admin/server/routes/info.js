@@ -7,7 +7,6 @@ const {
   readContent,
   writeContent,
   writeStatus,
-  findLatestReadyPost,
 } = require('../services/postStore');
 const { runInfoPipeline } = require('../services/infoPipeline');
 const { writePost } = require('../services/markdownWriter');
@@ -27,12 +26,6 @@ router.post('/generate', (req, res) => {
   runInfoPipeline({ postId });
 
   res.json({ ok: true, postId });
-});
-
-// 아직 발행 안 된, 준비 완료 상태의 초안이 있으면 그 postId를 돌려준다
-// (페이지를 새로 열어도 이어서 편집할 수 있게).
-router.get('/pending', (req, res) => {
-  res.json({ postId: findLatestReadyPost('info') });
 });
 
 router.get('/:id/status', (req, res) => {

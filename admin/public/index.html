@@ -43,7 +43,10 @@
         <label class="field"><span>본문</span><textarea id="editor-body" rows="12"></textarea></label>
         <label class="field"><span>표지 이미지 대체 텍스트</span><input type="text" id="editor-alt" /></label>
         <label class="field"><span>나의 한마디 (선택)</span><textarea id="editor-humannote" rows="2"></textarea></label>
-        <button type="button" class="btn" id="publish-btn">발행하기</button>
+        <div class="btn-row">
+          <button type="button" class="btn" id="publish-btn">발행하기</button>
+          <button type="button" class="btn btn--ghost" id="new-experience-btn" hidden>새 글쓰기</button>
+        </div>
         <p id="publish-result" class="result"></p>
       </div>
     </section>
@@ -76,7 +79,10 @@
           <textarea id="info-humannote" rows="2" placeholder="이 글에 대한 본인의 생각을 한 문장 이상 적어주세요."></textarea>
         </label>
         <p id="info-gate-warning" class="result" hidden>"나의 한마디"를 작성해야 발행 버튼이 활성화됩니다.</p>
-        <button type="button" class="btn" id="info-publish-btn" disabled>발행하기</button>
+        <div class="btn-row">
+          <button type="button" class="btn" id="info-publish-btn" disabled>발행하기</button>
+          <button type="button" class="btn btn--ghost" id="new-info-btn" hidden>새 글쓰기</button>
+        </div>
         <p id="info-publish-result" class="result"></p>
       </div>
     </section>

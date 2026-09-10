@@ -59,9 +59,26 @@ const progressText = document.getElementById('experience-progress-text');
 const editorBox = document.getElementById('experience-editor');
 const publishBtn = document.getElementById('publish-btn');
 const publishResult = document.getElementById('publish-result');
+const newExperienceBtn = document.getElementById('new-experience-btn');
 
 let currentPostId = null;
 let pollTimer = null;
+
+// 발행 완료 후 "새 글쓰기"를 누르면 처음 열었을 때와 같은 빈 상태로 되돌린다.
+function resetExperienceForm() {
+  currentPostId = null;
+  clearInterval(pollTimer);
+  experienceForm.reset();
+  experienceSubmitBtn.disabled = false;
+  progressBox.hidden = true;
+  progressText.textContent = '';
+  editorBox.hidden = true;
+  publishBtn.disabled = false;
+  newExperienceBtn.hidden = true;
+  publishResult.textContent = '';
+}
+
+newExperienceBtn.addEventListener('click', resetExperienceForm);
 
 experienceForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -141,9 +158,25 @@ const infoHumanNoteInput = document.getElementById('info-humannote');
 const infoGateWarning = document.getElementById('info-gate-warning');
 const infoPublishBtn = document.getElementById('info-publish-btn');
 const infoPublishResult = document.getElementById('info-publish-result');
+const newInfoBtn = document.getElementById('new-info-btn');
 
 let currentInfoPostId = null;
 let infoPollTimer = null;
+
+function resetInfoForm() {
+  currentInfoPostId = null;
+  clearInterval(infoPollTimer);
+  infoGenerateBtn.disabled = false;
+  infoProgressBox.hidden = true;
+  infoProgressText.textContent = '';
+  infoEditorBox.hidden = true;
+  infoHumanNoteInput.value = '';
+  newInfoBtn.hidden = true;
+  infoPublishResult.textContent = '';
+  updateInfoGate();
+}
+
+newInfoBtn.addEventListener('click', resetInfoForm);
 
 infoGenerateBtn.addEventListener('click', async () => {
   infoGenerateBtn.disabled = true;
@@ -214,6 +247,7 @@ infoHumanNoteInput.addEventListener('input', updateInfoGate);
 
 infoPublishBtn.addEventListener('click', async () => {
   infoPublishBtn.disabled = true;
+  newInfoBtn.hidden = true;
   infoPublishResult.textContent = '저장 중...';
 
   const patch = {
@@ -239,19 +273,21 @@ infoPublishBtn.addEventListener('click', async () => {
     const json = await res.json();
     if (json.ok) {
       infoPublishResult.textContent = `발행 완료: ${json.slug} (1~2분 후 사이트에 반영됩니다)`;
+      newInfoBtn.hidden = false;
       loadDashboardBanner();
     } else {
       infoPublishResult.textContent = `실패: ${json.error}`;
+      updateInfoGate();
     }
   } catch (err) {
     infoPublishResult.textContent = `실패: ${err.message}`;
-  } finally {
     updateInfoGate();
   }
 });
 
 publishBtn.addEventListener('click', async () => {
   publishBtn.disabled = true;
+  newExperienceBtn.hidden = true;
   publishResult.textContent = '저장 중...';
 
   const patch = {
@@ -276,33 +312,14 @@ publishBtn.addEventListener('click', async () => {
     const json = await res.json();
     if (json.ok) {
       publishResult.textContent = `발행 완료: ${json.slug} (1~2분 후 사이트에 반영됩니다)`;
+      newExperienceBtn.hidden = false;
       loadDashboardBanner();
     } else {
       publishResult.textContent = `실패: ${json.error}`;
+      publishBtn.disabled = false;
     }
   } catch (err) {
     publishResult.textContent = `실패: ${err.message}`;
-  } finally {
     publishBtn.disabled = false;
   }
 });
-
-// ---- 페이지를 새로 열어도 대기 중인 초안을 이어서 편집할 수 있게 자동으로 불러오기 ----
-
-(async () => {
-  const res = await fetch('/api/experience/pending');
-  const { postId } = await res.json();
-  if (postId) {
-    currentPostId = postId;
-    await loadEditor();
-  }
-})();
-
-(async () => {
-  const res = await fetch('/api/info/pending');
-  const { postId } = await res.json();
-  if (postId) {
-    currentInfoPostId = postId;
-    await loadInfoEditor();
-  }
-})();
